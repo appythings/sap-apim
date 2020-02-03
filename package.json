@@ -1,0 +1,31 @@
+{
+  "name": "sap-apim",
+  "bin": "src/index.js",
+  "version": "1.0.0",
+  "description": "Commandline tool to use the management APIs of SAP API Management",
+  "main": "src/index.js",
+  "scripts": {
+    "sap-apim": "node src/provider.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/reiniervanderhoeven/sap-apim.git"
+  },
+  "keywords": [
+    "sap",
+    "api",
+    "management"
+  ],
+  "author": "Reinier van der Hoeven",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/reiniervanderhoeven/sap-apim/issues"
+  },
+  "homepage": "https://github.com/reiniervanderhoeven/sap-apim#readme",
+  "dependencies": {
+    "commander": "^4.1.1",
+    "js-yaml": "^3.13.1",
+    "odata-client": "^0.6.13",
+    "request-promise": "^4.2.5"
+  }
+}
