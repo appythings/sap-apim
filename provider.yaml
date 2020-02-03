@@ -2,11 +2,7 @@ provider:
   name: example-provider
   description: This is an example provider
   type: Internet # default Internet
-  host:
-    dev: example.com
-    tst: example.com
-    acc: example.com
-    prd: example.com
+  host: example.com
   port: 443 # default 443
   useSsl: true # default true
   path: /v1/test

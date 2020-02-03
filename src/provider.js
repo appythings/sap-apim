@@ -8,7 +8,11 @@ const user = process.env.SAPIM_USERNAME
 const pass = process.env.SAPIM_PASSWORD
 
 const provider = new ApiProvider(`https://${host}/apiportal/api/1.0/Management.svc`, {user, pass})
-const config = yaml.safeLoad(fs.readFileSync('provider.yaml', 'utf8'))
+let config = yaml.safeLoad(fs.readFileSync('provider.yaml', 'utf8'))
+if(fs.existsSync(`provider-${env}.yaml`)){
+  const envSpecificConfig = yaml.safeLoad(fs.readFileSync(`provider-${env}.yaml`, 'utf8'))
+  config = {...config, ...envSpecificConfig }
+}
 const providerConfig = config.provider
 const newProvider = {
   'description': providerConfig.description,
