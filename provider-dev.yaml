@@ -1,4 +1,0 @@
-provider:
-  host: dev-example.com
-  keyStore: openshift2
-  keyAlias: openshift2

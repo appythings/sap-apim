@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const ApiProvider = require('./api-provider')
+const ApiProvider = require('./models/api-provider')
 const yaml = require('js-yaml')
 const fs = require('fs')
 const host = process.env.SAPIM_HOST
@@ -7,37 +7,7 @@ const env = process.env.SAPIM_ENV
 const user = process.env.SAPIM_USERNAME
 const pass = process.env.SAPIM_PASSWORD
 
-const provider = new ApiProvider(`https://${host}/apiportal/api/1.0/Management.svc`, {user, pass})
-let config = yaml.safeLoad(fs.readFileSync('provider.yaml', 'utf8'))
-if(fs.existsSync(`provider-${env}.yaml`)){
-  const envSpecificConfig = yaml.safeLoad(fs.readFileSync(`provider-${env}.yaml`, 'utf8'))
-  config = {...config, ...envSpecificConfig }
-}
-const providerConfig = config.provider
-const newProvider = {
-  'description': providerConfig.description,
-  'destType': providerConfig.type ? providerConfig.type : 'Internet',
-  'host': providerConfig.host[env],
-  'name': providerConfig.name,
-  'trustAll': false,
-  'title': providerConfig.name,
-  'authType': 'NONE',
-  'port': providerConfig.port ? providerConfig.port : 443,
-  'pathPrefix': providerConfig.path || null,
-  'useSSL': providerConfig.useSsl !== 'false',
-  'isOnPremise': false,
-  'rt_auth': null,
-  'sslInfo': {
-    'ciphers': '',
-    'clientAuthEnabled': !!providerConfig.keyStore,
-    'enabled': providerConfig.useSsl !== 'false',
-    'ignoreValidationErrors': false,
-    'keyAlias': providerConfig.keyAlias || null,
-    'keyStore': providerConfig.keyStore || null,
-    'protocols': '',
-    'trustStore': providerConfig.trustStore || null
-  }
-}
+
 
 const isUpdated = (a, b, properties) => {
   return properties.find(prop => {
@@ -49,7 +19,37 @@ const isUpdated = (a, b, properties) => {
   })
 }
 
-module.exports = async () => {
+module.exports = async (config, manifest) => {
+  const provider = new ApiProvider(config)
+  let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
+  const providerConfig = yml.provider
+  if(!providerConfig){
+    return false
+  }
+  const newProvider = {
+    'description': providerConfig.description,
+    'destType': providerConfig.isOnPremise !== 'false' ? 'ODATA' : 'Internet',
+    'host': providerConfig.host,
+    'name': providerConfig.name,
+    'trustAll': false,
+    'title': providerConfig.name,
+    'authType': 'NONE',
+    'port': providerConfig.port ? providerConfig.port : 443,
+    'pathPrefix': providerConfig.path || null,
+    'useSSL': providerConfig.useSsl !== 'false',
+    'isOnPremise': providerConfig.isOnPremise !== 'false',
+    'rt_auth': null,
+    'sslInfo': {
+      'ciphers': '',
+      'clientAuthEnabled': !!providerConfig.keyStore,
+      'enabled': providerConfig.useSsl !== 'false',
+      'ignoreValidationErrors': false,
+      'keyAlias': providerConfig.keyAlias || null,
+      'keyStore': providerConfig.keyStore || null,
+      'protocols': '',
+      'trustStore': providerConfig.trustStore || null
+    }
+  }
   const current = await provider.findById(providerConfig.name)
   if (current.statusCode === 404) {
     if (providerConfig.managedByProxy === true) {

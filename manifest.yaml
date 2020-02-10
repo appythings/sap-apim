@@ -1,7 +1,7 @@
 provider:
   name: example-provider
   description: This is an example provider
-  type: Internet # default Internet
+  isOnPremise: false # default false
   host: example.com
   port: 443 # default 443
   useSsl: true # default true

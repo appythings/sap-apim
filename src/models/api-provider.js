@@ -2,9 +2,12 @@ const odata = require('odata-client');
 const request = require('request-promise');
 
 module.exports = class ApiProvider {
-  constructor(uri, auth) {
-    this.uri = uri;
-    this.auth = auth;
+  constructor(config) {
+    this.uri = `https://${config.host}/apiportal/api/1.0/Management.svc`;
+    this.auth = {
+      user: config.username,
+      pass: config.password,
+    };
     this.resource = 'APIProviders';
   }
 
@@ -32,13 +35,8 @@ module.exports = class ApiProvider {
   }
 
   async findById(id) {
-    try{
-      const q = await this.getOdataQuery(id)
-      return q.get();
-    } catch (e) {
-      console.log('iets')
-      return
-    }
+    const q = await this.getOdataQuery(id)
+    return q.get();
   }
 
   async create(body) {
