@@ -28,7 +28,7 @@ module.exports = async (config, manifest) => {
   }
   const newProvider = {
     'description': providerConfig.description,
-    'destType': providerConfig.isOnPremise !== 'false' ? 'ODATA' : 'Internet',
+    'destType': providerConfig.isOnPremise === 'true' ? 'ODATA' : 'Internet',
     'host': providerConfig.host,
     'name': providerConfig.name,
     'trustAll': false,
@@ -37,7 +37,7 @@ module.exports = async (config, manifest) => {
     'port': providerConfig.port ? providerConfig.port : 443,
     'pathPrefix': providerConfig.path || null,
     'useSSL': providerConfig.useSsl !== 'false',
-    'isOnPremise': providerConfig.isOnPremise !== 'false',
+    'isOnPremise': providerConfig.isOnPremise === 'true' ,
     'rt_auth': null,
     'sslInfo': {
       'ciphers': '',
