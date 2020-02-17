@@ -2,12 +2,6 @@
 const ApiProvider = require('./models/api-provider')
 const yaml = require('js-yaml')
 const fs = require('fs')
-const host = process.env.SAPIM_HOST
-const env = process.env.SAPIM_ENV
-const user = process.env.SAPIM_USERNAME
-const pass = process.env.SAPIM_PASSWORD
-
-
 
 const isUpdated = (a, b, properties) => {
   return properties.find(prop => {

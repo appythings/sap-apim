@@ -2,6 +2,7 @@
 const program = require('commander')
 const {version, name, description} = require('../package.json')
 const updateProvider = require('./provider')
+const updateProducts = require('./apiproduct')
 const sapim = require("sapim");
 const dotenv = require("dotenv");
 
@@ -26,5 +27,9 @@ program.name(name)
 program.command('provider <manifest>')
   .description('creates or updates a provider based on the given manifest')
   .action(manifest => updateProvider(build().config, manifest))
+
+program.command('products <manifest>')
+  .description('creates or updates a list of products based on the given manifest')
+  .action(manifest => updateProducts(build().config, manifest))
 
 program.parse(process.argv)

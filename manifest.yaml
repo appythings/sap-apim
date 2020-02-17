@@ -6,6 +6,6 @@ provider:
   port: 443 # default 443
   useSsl: true # default true
   path: /v1/test
-  keyStore: openshift
-  keyAlias: openshift
-  managedByProxy: true
+  keyStore: example # optional, useSsl must be true
+  keyAlias: example # optional, useSsl must be true
+  managedByProxy: true # default false
