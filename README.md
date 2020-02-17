@@ -1,7 +1,7 @@
 # sap-apim
 Commandline tool to use the management APIs of SAP API Management
 
-Currently supports creating / updating providers
+Currently supports creating / updating providers and products
 
 # Installation
 ```npm i -g sap-apim```
