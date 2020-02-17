@@ -23,4 +23,6 @@ provider:
 ```
 
 # Use
+Use in combination with [sapim](https://www.npmjs.com/package/sapim)
+
 ```sap-apim provider ./manifest.yaml```
