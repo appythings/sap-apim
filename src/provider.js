@@ -19,8 +19,9 @@ module.exports = async (config, manifest) => {
   const providerConfig = yml.provider
   if(!providerConfig){
     return false
-  }else{
-    return console.log(JSON.stringify(providerConfig))
+  }
+  if(!providerConfig.host || !providerConfig.name) {
+    throw new Error('Missing required property host or name')
   }
   const newProvider = {
     'description': providerConfig.description,
