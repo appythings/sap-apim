@@ -41,7 +41,7 @@ module.exports = async (config, manifest) => {
       const body = JSON.parse(response.body)
       if (body.error) {
         console.error(body.error.message.value)
-        process.exit(0)
+        process.exitCode = 1;
       } else {
         console.log('Created product: '+ newProduct.name)
       }
@@ -52,10 +52,11 @@ module.exports = async (config, manifest) => {
 
       if (add.length > 0 || remove.length > 0 || isUpdated(currentProduct.d, newProduct, ['description', 'quotaCount', 'quotaInterval', 'quotaTimeUnit'])) {
         const errors = await productModel.update(newProduct, product.name, add, remove)
+        console.log(newProduct, currentProduct.d)
         errors.forEach(response => {
           if (response.error) {
             console.error(response.error.message.value)
-            process.exit(0)
+            process.exitCode = 1;
           }
         })
         if (errors.length === 0) {

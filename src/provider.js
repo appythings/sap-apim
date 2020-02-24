@@ -19,6 +19,8 @@ module.exports = async (config, manifest) => {
   const providerConfig = yml.provider
   if(!providerConfig){
     return false
+  }else{
+    return console.log(JSON.stringify(providerConfig))
   }
   const newProvider = {
     'description': providerConfig.description,
@@ -51,6 +53,7 @@ module.exports = async (config, manifest) => {
       console.log('Created provider')
     } else {
       console.log('Provider not found, but the provider is not managed by this proxy. Please create the provider manually.')
+      process.exitCode = 1;
     }
   } else {
     const currentProvider = JSON.parse(current.body)
