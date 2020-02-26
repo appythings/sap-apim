@@ -8,7 +8,7 @@ module.exports = class Model {
     this.loginMethod = loginMethod;
     this.auth = auth;
     this.resource = resource;
-    this.cookie = null;
+    this.cookie = undefined;
   }
 
   async getHeaders() {
@@ -37,6 +37,13 @@ module.exports = class Model {
     return q;
   }
 
+  handleResponse(response) {
+    if(response.statusCode >= 400) {
+      throw new Error(response.body)
+    }
+    return response
+  }
+
   async find(filter, orderby) {
     let q = await this.getOdataQuery();
     q = this.addFilters(q);
@@ -46,31 +53,32 @@ module.exports = class Model {
     if (orderby) {
       q.orderby(orderby);
     }
-    return q.get();
+    return q.get().then(this.handleResponse);
   }
 
   async findById(id) {
     const q = await this.getOdataQuery(id);
-    return this.addFilters(q).get();
+    return this.addFilters(q).get().then(this.handleResponse);
   }
 
   async create(body) {
     const q = await this.getOdataQuery();
-    return q.post(this.to(body));
+    return q.post(this.to(body)).then(this.handleResponse);
   }
 
   async update(body, id) {
     const q = await this.getOdataQuery(id);
-    return q.put(this.to(body));
+    return q.put(this.to(body)).then(this.handleResponse);
   }
 
   async delete(id) {
     const q = await this.getOdataQuery(id);
-    return q.delete();
+    q.url.qurl.pathname = q.url.qurl.pathname.replace(/%3D/g, '=')
+    return q.delete().then(this.handleResponse);
   }
 
-  async getOdataQuery(id) {
-    return odata({ service: this.uri, headers: await this.getHeaders() }).resource(this.resource, id);
+  async getOdataQuery(id, service) {
+    return odata({ service: service || this.uri, headers: await this.getHeaders() }).resource(this.resource, id);
   }
 
   from(model) {
@@ -90,7 +98,7 @@ module.exports = class Model {
     q._batch.ops = q._batch.ops.map((op) => ({
       ...op, query: op.query.split('/Management.svc/').pop().replace('%3D', '='),
     }));
-    return this.processBatchResponse(await q.send());
+    return this.processBatchResponse(await q.send().then(this.handleResponse));
   }
 
   processBatchResponse(response){
