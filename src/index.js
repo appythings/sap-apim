@@ -56,7 +56,13 @@ program.command('documentation <swagger> <apiProxyFolder>')
     await fs.writeJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html', json)
     await fs.move('./downloaded/APIProxy/Documentation', apiProxyFolder + '/Documentation')
     await fs.move('./downloaded/APIProxy/APIResource', apiProxyFolder + '/APIResource')
+    const file = await fs.readFile(`./downloaded/APIProxy/${name}.xml`, 'utf8')
+    const regex = /<proxyEndPoints>[\s\S]*<\/proxyEndPoints>/
+    const endpoints = file.match(regex)
+    const proxyFile = await fs.readFile(`${apiProxyFolder}/index.xml`, 'utf8')
+    fs.writeFile(`${apiProxyFolder}/index.xml`, proxyFile.replace(regex, endpoints[0]))
     await fs.remove('./downloaded')
+
     console.log('Succesfully created API documentation')
   })
 

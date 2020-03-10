@@ -1,7 +1,7 @@
 # sap-apim
 Commandline tool to use the management APIs of SAP API Management
 
-Currently supports creating / updating providers and products
+Currently supports creating / updating providers and products and generating documentation
 
 # Installation
 ```npm i -g sap-apim```
@@ -56,3 +56,16 @@ products:
 Use in combination with [sapim](https://www.npmjs.com/package/sapim)
 
 ```sap-apim products ./products.yaml```
+
+# To create documentation for your api proxy
+To be able to see the documentation of an API proxy correctly in the SAP developer portal, 
+the APIProxy requires 2 folders with some documentation content.
+This command will generate those 2 folders from an openapi spec by creating, downloading, extracting the 2 folders and deleting a proxy in SAP.
+Both openapi 3.0 and swagger 2.0 are supported in json and yml format.
+
+## Use
+Use in combination with [sapim](https://www.npmjs.com/package/sapim)
+```
+sap-apim documentation <spec> <outputFolder>
+sap-apim documentation ./openapi.yml ./APIProxy
+```
