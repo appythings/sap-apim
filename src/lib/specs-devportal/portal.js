@@ -35,7 +35,7 @@ class Portal {
 
     async pushSwagger(swagger) {
         await this.login()
-        return await this.request.post(`/api/specs`, {
+        return this.request.post(`/api/specs`, {
             'productId': `${this.config.product}`,
             'environmentId': `${this.config.environment}`,
             'spec': swagger
