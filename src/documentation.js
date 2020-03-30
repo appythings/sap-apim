@@ -29,10 +29,13 @@ const convertSwagger = async (swagger) => {
   return converted.spec
 }
 
-module.exports = async (config, swaggerFile) => {
+module.exports = async (config, swaggerFile, host) => {
   const apiModel = new Api(config)
   const swagger = await convertSwagger(readSwaggerFile(swaggerFile))
   const name = uuid.v4()
+  if(host) {
+    swagger.host = host;
+  }
   swagger.basePath = '/' + name + swagger.basePath
   await apiModel.create({name: name, content: JSON.stringify(swagger)})
   return name
