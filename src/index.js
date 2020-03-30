@@ -38,7 +38,7 @@ program.command('products <manifest>')
 program.command('documentation <swagger> <apiProxyFolder>')
   .option('-h, --host <host>', 'add the hostname for the SAP environment', null)
   .description('creates or updates a list of products based on the given manifest')
-  .action(async (swagger, apiProxyFolder, host) => {
+  .action(async (swagger, apiProxyFolder, command) => {
     if(!await fs.pathExists(swagger)){
       throw new Error('Path ' + swagger + ' does not exist.')
     }
@@ -46,7 +46,7 @@ program.command('documentation <swagger> <apiProxyFolder>')
       throw new Error('Path ' + apiProxyFolder + ' does not exist.')
     }
     const sapimBuild = build()
-    const name = await createDocumentation(sapimBuild.config, swagger, host)
+    const name = await createDocumentation(sapimBuild.config, swagger, command.host)
     const apiProxyModel = new apiProxy(sapimBuild.config)
     await apiProxyModel.download(name, './downloaded')
     await apiProxyModel.delete({name})
