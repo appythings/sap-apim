@@ -37,6 +37,7 @@ module.exports = async (config, swaggerFile, host) => {
     swagger.host = host;
   }
   swagger.basePath = '/' + name + swagger.basePath
+  console.log(name, JSON.stringify(swagger))
   await apiModel.create({name: name, content: JSON.stringify(swagger)})
   return name
 }

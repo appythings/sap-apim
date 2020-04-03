@@ -6,8 +6,13 @@ const updateProvider = require('./provider')
 const updateProducts = require('./apiproduct')
 const createDocumentation = require('./documentation')
 const apiProxy = require('./models/api-proxy')
+const Portal = require('./devportal/portal')
 const sapim = require("sapim");
 const dotenv = require("dotenv");
+const chai = require('chai')
+const archiver = require('archiver');
+const streamToPromise = require('stream-to-promise');
+const expect = chai.expect
 
 function build() {
   if (program.env) {
@@ -66,5 +71,83 @@ program.command('documentation <swagger> <apiProxyFolder>')
 
     console.log('Succesfully created API documentation')
   })
+
+
+
+program.command('devportal-upload-spec <openapispec>')
+  .option('-e, --env <env>', 'add the environment to deploy this to', null)
+  .option('-h, --host <host>', 'add the hostname for the developer portal', null)
+  .option('-p, --product <product>', 'add the name of the SAP product to link the documentation to', null)
+  .option('-c, --clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
+  .option('-s, --clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', null)
+  .option('-sc, --scope <scope>', 'add the scope for the developer portal app registration', null)
+  .option('-t, --tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider', null)
+  .description('uploads an openapi spec to the developer portal')
+  .action((openapispec, command) => {
+    expect(command.env, '--env argument missing').to.be.ok
+    expect(command.host, '--host argument missing').to.be.ok
+    expect(command.product, '--product argument missing').to.be.ok
+    expect(command.clientId, '--clientId argument missing').to.be.ok
+    expect(command.clientSecret, '--clientSecret argument missing').to.be.ok
+    expect(command.scope, '--scope argument missing').to.be.ok
+    expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
+
+    const config = {
+      product: command.product,
+      environment: command.env,
+      clientId: command.clientId,
+      clientSecret: command.clientSecret,
+      hostname: command.host,
+      scope: command.scope,
+      tokenUrl: command.tokenUrl,
+      grantType: 'client_credentials'
+    }
+
+    const portal = new Portal(config)
+    const swagger = JSON.parse(fs.readFileSync(openapispec))
+
+    portal.pushSwagger(swagger).catch(error => {
+      console.log(error)
+      process.exit(1)
+    })
+  })
+
+program.command('devportal-upload-markdown <directory>')
+  .option('-h, --host <host>', 'add the hostname for the developer portal', null)
+  .option('-c, --clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
+  .option('-s, --clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', null)
+  .option('-a, --scope <scope>', 'add the scope for the developer portal app registration', null)
+  .option('-t, --tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider', null)
+  .description('uploads a directory of markdown files to the developer portal')
+  .action(async (directory, command) => {
+    expect(command.host, '--host argument missing').to.be.ok
+    expect(command.clientId, '--clientId argument missing').to.be.ok
+    expect(command.clientSecret, '--clientSecret argument missing').to.be.ok
+    expect(command.scope, '--scope argument missing').to.be.ok
+    expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
+
+    const config = {
+      clientId: command.clientId,
+      clientSecret: command.clientSecret,
+      hostname: command.host,
+      scope: command.scope,
+      tokenUrl: command.tokenUrl,
+      grantType: 'client_credentials'
+    }
+
+    const portal = new Portal(config)
+
+    let archive = archiver("zip");
+    archive.directory(directory, false);
+    archive.finalize();
+
+    // const done = await streamToPromise(archive)
+
+    portal.pushMarkdown(archive).catch(error => {
+      console.log(error)
+      process.exit(1)
+    })
+  })
+
 
 program.parse(process.argv)

@@ -25,6 +25,7 @@
   "homepage": "https://github.com/reiniervanderhoeven/sap-apim#readme",
   "dependencies": {
     "api-spec-converter": "^2.11.0",
+    "archiver": "^3.1.1",
     "axios": "^0.19.2",
     "commander": "^4.1.1",
     "dotenv": "^8.2.0",
@@ -33,13 +34,13 @@
     "mem": ">=4.0.0",
     "memorystream": "^0.3.1",
     "odata-client": "^0.6.13",
+    "qs": "latest",
     "request-promise": "^4.2.5",
     "sapim": "0.0.7",
     "stream-to-promise": "^2.2.0",
     "unzip-stream": "^0.3.0",
     "uuid": "^7.0.1",
-    "yargs": "latest",
-    "qs": "latest"
+    "yargs": "latest"
   },
   "devDependencies": {
     "chai": "^4.2.0"
