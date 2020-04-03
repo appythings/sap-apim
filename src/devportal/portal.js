@@ -33,11 +33,10 @@ class Portal {
     this.request.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.access_token
   }
 
-  async pushSwagger (swagger) {
+  async pushSwagger(swagger) {
     await this.login()
-    return this.request.post(`/api/specs`, {
-      'productId': `${this.config.product}`,
-      'environmentId': `${this.config.environment}`,
+    return this.request.post(`api/environments/${this.config.environment}/apiproducts/${this.config.product}/specs${this.config.force ? '?force=true' : ""}`, {
+      "environmentId": this.config.environment,
       'spec': swagger
     })
   }
