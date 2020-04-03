@@ -7,20 +7,20 @@ const updateProducts = require('./apiproduct')
 const createDocumentation = require('./documentation')
 const apiProxy = require('./models/api-proxy')
 const Portal = require('./devportal/portal')
-const sapim = require("sapim");
-const dotenv = require("dotenv");
+const sapim = require('sapim')
+const dotenv = require('dotenv')
 const chai = require('chai')
-const archiver = require('archiver');
-const streamToPromise = require('stream-to-promise');
+const archiver = require('archiver')
+const streamToPromise = require('stream-to-promise')
 const expect = chai.expect
 
-function build() {
+function build () {
   if (program.env) {
-    dotenv.config({ path: program.env });
-    return sapim.default();
+    dotenv.config({path: program.env})
+    return sapim.default()
   } else {
-    dotenv.config();
-    return sapim.default();
+    dotenv.config()
+    return sapim.default()
   }
 }
 
@@ -44,10 +44,10 @@ program.command('documentation <swagger> <apiProxyFolder>')
   .option('-h, --host <host>', 'add the hostname for the SAP environment', null)
   .description('creates or updates a list of products based on the given manifest')
   .action(async (swagger, apiProxyFolder, command) => {
-    if(!await fs.pathExists(swagger)){
+    if (!await fs.pathExists(swagger)) {
       throw new Error('Path ' + swagger + ' does not exist.')
     }
-    if(!await fs.pathExists(apiProxyFolder)){
+    if (!await fs.pathExists(apiProxyFolder)) {
       throw new Error('Path ' + apiProxyFolder + ' does not exist.')
     }
     const sapimBuild = build()
@@ -71,8 +71,6 @@ program.command('documentation <swagger> <apiProxyFolder>')
 
     console.log('Succesfully created API documentation')
   })
-
-
 
 program.command('devportal-upload-spec <openapispec>')
   .option('--environment <env>', 'add the environment to deploy this to', null)
@@ -137,17 +135,16 @@ program.command('devportal-upload-markdown <directory>')
 
     const portal = new Portal(config)
 
-    let archive = archiver("zip");
-    archive.directory(directory, false);
-    archive.finalize();
+    let archive = archiver('zip')
+    archive.directory(directory, false)
+    archive.finalize()
 
     const done = await streamToPromise(archive)
 
-    portal.pushMarkdown(done).catch(error => {
+    portal.pushMarkdown(done).then(() => console.log('Succefully pushed markdown to developer portal')).catch(error => {
       console.log(error)
       process.exit(1)
     })
   })
-
 
 program.parse(process.argv)
