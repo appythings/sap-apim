@@ -1,6 +1,6 @@
 const axios = require('axios')
 const qs = require('qs')
-const FormData = require('form-data');
+const FormData = require('form-data')
 
 class Portal {
   constructor (config) {
@@ -45,16 +45,18 @@ class Portal {
 
   async pushMarkdown (zipFile) {
     await this.login()
-    const form = new FormData();
+    const form = new FormData()
     form.append('zip', zipFile, {
       filename: 'markdown.zip'
-    });
-    form.submit(`http://${this.config.hostname}/markdown`, (err) => {
-      if(err) {
-        console.log(err)
-        process.exit(1)
-      }
     })
+    return axios.post(`http://${this.config.hostname}/markdown`,
+      form.getBuffer(),
+      {
+        headers: {
+          ...form.getHeaders(),
+          Authorization: this.request.defaults.headers.common['Authorization']
+        }
+      })
   }
 }
 
