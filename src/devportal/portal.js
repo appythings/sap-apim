@@ -1,5 +1,6 @@
 const axios = require('axios')
 const qs = require('qs')
+const FormData = require('form-data');
 
 class Portal {
   constructor (config) {
@@ -43,14 +44,16 @@ class Portal {
   }
 
   async pushMarkdown (zipFile) {
-    console.log(zipFile)
     await this.login()
-    return this.request(`/markdown`, {
-      method: 'POST',
-      formData: {
-        zip: zipFile
+    const form = new FormData();
+    form.append('zip', zipFile, {
+      filename: 'markdown.zip'
+    });
+    form.submit(`http://${this.config.hostname}/markdown`, (err) => {
+      if(err) {
+        console.log(err)
+        process.exit(1)
       }
-
     })
   }
 }
