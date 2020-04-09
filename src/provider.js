@@ -17,10 +17,10 @@ module.exports = async (config, manifest) => {
   const provider = new ApiProvider(config)
   let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
   const providerConfig = yml.provider
-  if(!providerConfig){
+  if (!providerConfig) {
     return false
   }
-  if(!providerConfig.host || !providerConfig.name) {
+  if (!providerConfig.host || !providerConfig.name) {
     throw new Error('Missing required property host or name')
   }
   const newProvider = {
@@ -47,16 +47,8 @@ module.exports = async (config, manifest) => {
       'trustStore': providerConfig.trustStore || null
     }
   }
-  const current = await provider.findById(providerConfig.name)
-  if (current.statusCode === 404) {
-    if (providerConfig.managedByProxy === true) {
-      const result = await provider.create(newProvider)
-      console.log('Created provider')
-    } else {
-      console.log('Provider not found, but the provider is not managed by this proxy. Please create the provider manually.')
-      process.exitCode = 1;
-    }
-  } else {
+  try {
+    const current = await provider.findById(providerConfig.name)
     const currentProvider = JSON.parse(current.body)
     if (isUpdated(currentProvider.d, newProvider, ['host', 'port', 'pathPrefix', 'useSSL', 'sslInfo.keyStore', 'sslInfo.keyAlias', 'sslInfo.trustStore'])) {
       if (providerConfig.managedByProxy === true) {
@@ -65,8 +57,21 @@ module.exports = async (config, manifest) => {
       } else {
         console.log('Change detected in provider, but the provider is not managed by this proxy. Please update the provider manually.')
       }
-    } else{
+    } else {
       console.log('Provider up to date')
+    }
+  } catch (e) {
+    if (e.message.includes('not found')) {
+      if (providerConfig.managedByProxy === true) {
+        const result = await provider.create(newProvider)
+        console.log('Created provider')
+      } else {
+        console.log('Provider not found, but the provider is not managed by this proxy. Please create the provider manually.')
+        process.exitCode = 1
+      }
+    } else {
+      console.log(e.message)
+      process.exitCode = 1
     }
   }
 }
