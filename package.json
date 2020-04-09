@@ -1,7 +1,7 @@
 {
   "name": "sap-apim",
   "bin": "src/index.js",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Commandline tool to use the management APIs of SAP API Management",
   "main": "src/index.js",
   "scripts": {
@@ -36,6 +36,7 @@
     "memorystream": "^0.3.1",
     "odata-client": "^0.6.13",
     "qs": "latest",
+    "request-promise": "^4.2.5",
     "sapim": "0.0.7",
     "stream-to-promise": "^2.2.0",
     "unzip-stream": "^0.3.0",
