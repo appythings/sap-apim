@@ -106,9 +106,8 @@ program.command('devportal-upload-spec <openapispec>')
         }
 
         const portal = new Portal(config)
-        const swagger = JSON.parse(fs.readFileSync(openapispec))
 
-        portal.pushSwagger(swagger).catch(error => {
+        portal.pushSwagger(openapispec).catch(error => {
             console.log(error)
             process.exit(1)
         })
