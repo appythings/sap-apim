@@ -1,7 +1,7 @@
 {
   "name": "sap-apim",
   "bin": "src/index.js",
-  "version": "1.0.12",
+  "version": "1.0.16",
   "description": "Commandline tool to use the management APIs of SAP API Management",
   "main": "src/index.js",
   "scripts": {
@@ -30,6 +30,7 @@
     "axios": "^0.19.2",
     "commander": "^4.1.1",
     "dotenv": "^8.2.0",
+    "form-data": "^3.0.0",
     "fs-extra": "^8.1.0",
     "js-yaml": "^3.13.1",
     "mem": ">=4.0.0",
@@ -41,9 +42,8 @@
     "stream-to-promise": "^2.2.0",
     "unzip-stream": "^0.3.0",
     "uuid": "^7.0.1",
+    "chai": "^4.2.0",
     "yargs": "latest"
   },
-  "devDependencies": {
-    "chai": "^4.2.0"
-  }
+  "devDependencies": {}
 }

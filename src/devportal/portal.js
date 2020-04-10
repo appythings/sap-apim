@@ -3,6 +3,7 @@ const qs = require('qs')
 const SwaggerParser = require("@apidevtools/swagger-parser");
 const yaml = require('js-yaml')
 const fs = require('fs-extra')
+const FormData = require('form-data')
 
 class Portal {
     constructor(config) {
@@ -58,17 +59,21 @@ class Portal {
         })
     }
 
-    async pushMarkdown(zipFile) {
-        console.log(zipFile)
-        await this.login()
-        return this.request(`/markdown`, {
-            method: 'POST',
-            formData: {
-                zip: zipFile
-            }
-
-        })
-    }
+  async pushMarkdown (zipFile) {
+    await this.login()
+    const form = new FormData()
+    form.append('zip', zipFile, {
+      filename: 'markdown.zip'
+    })
+    return axios.post(`http://${this.config.hostname}/markdown`,
+      form.getBuffer(),
+      {
+        headers: {
+          ...form.getHeaders(),
+          Authorization: this.request.defaults.headers.common['Authorization']
+        }
+      })
+  }
 }
 
 module.exports = Portal
