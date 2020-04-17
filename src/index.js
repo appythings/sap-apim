@@ -25,20 +25,20 @@ function build () {
 }
 
 program.name(name)
-  .version(version, '-v, --version')
-  .description(description)
-  .option('-s, --silent', 'suppress console output')
-  .option('-e, --env <path>', 'load environment variables from the given file')
-  .option('-c, --config <path>', 'load the given configuration file')
-  .option('-d, --debug', 'show debug messages')
+    .version(version, '-v, --version')
+    .description(description)
+    .option('-s, --silent', 'suppress console output')
+    .option('-e, --env <path>', 'load environment variables from the given file')
+    .option('-c, --config <path>', 'load the given configuration file')
+    .option('-d, --debug', 'show debug messages')
 
 program.command('provider <manifest>')
-  .description('creates or updates a provider based on the given manifest')
-  .action(manifest => updateProvider(build().config, manifest))
+    .description('creates or updates a provider based on the given manifest')
+    .action(manifest => updateProvider(build().config, manifest))
 
 program.command('products <manifest>')
-  .description('creates or updates a list of products based on the given manifest')
-  .action(manifest => updateProducts(build().config, manifest))
+    .description('creates or updates a list of products based on the given manifest')
+    .action(manifest => updateProducts(build().config, manifest))
 
 program.command('documentation <swagger> <apiProxyFolder>')
   .option('-h, --host <host>', 'add the hostname for the SAP environment', null)
@@ -69,20 +69,21 @@ program.command('documentation <swagger> <apiProxyFolder>')
     fs.writeFile(`${apiProxyFolder}/index.xml`, proxyFile.replace(regex, endpoints[0]))
     await fs.remove('./downloaded')
 
-    console.log('Succesfully created API documentation')
-  })
+        console.log('Succesfully created API documentation')
+    })
 
 program.command('devportal-upload-spec <openapispec>')
-  .option('--environment <env>', 'add the environment to deploy this to', null)
+  .option('--environment <environment>', 'add the environment to deploy this to', null)
   .option('--host <host>', 'add the hostname for the developer portal', null)
   .option('--product <product>', 'add the name of the SAP product to link the documentation to', null)
   .option('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
   .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', null)
   .option('--scope <scope>', 'add the scope for the developer portal app registration', null)
   .option('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider', null)
+  .option('--force <force>', 'Force the database to overwrite spec regardless of version number', null)
   .description('uploads an openapi spec to the developer portal')
   .action((openapispec, command) => {
-    expect(command.env, '--env argument missing').to.be.ok
+    expect(command.environment, '--environment argument missing').to.be.ok
     expect(command.host, '--host argument missing').to.be.ok
     expect(command.product, '--product argument missing').to.be.ok
     expect(command.clientId, '--clientId argument missing').to.be.ok
@@ -90,25 +91,25 @@ program.command('devportal-upload-spec <openapispec>')
     expect(command.scope, '--scope argument missing').to.be.ok
     expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
 
-    const config = {
-      product: command.product,
-      environment: command.env,
-      clientId: command.clientId,
-      clientSecret: command.clientSecret,
-      hostname: command.host,
-      scope: command.scope,
-      tokenUrl: command.tokenUrl,
-      grantType: 'client_credentials'
-    }
+        const config = {
+            product: command.product,
+            environment: command.environment,
+            clientId: command.clientId,
+            clientSecret: command.clientSecret,
+            hostname: command.host,
+            scope: command.scope,
+            tokenUrl: command.tokenUrl,
+            grantType: 'client_credentials',
+            force: command.force
+        }
 
-    const portal = new Portal(config)
-    const swagger = JSON.parse(fs.readFileSync(openapispec))
+        const portal = new Portal(config)
 
-    portal.pushSwagger(swagger).catch(error => {
-      console.log(error)
-      process.exit(1)
+        portal.pushSwagger(openapispec).catch(error => {
+            console.log(error)
+            process.exit(1)
+        })
     })
-  })
 
 program.command('devportal-upload-markdown <directory>')
   .option('-h, --host <host>', 'add the hostname for the developer portal', null)
@@ -124,16 +125,16 @@ program.command('devportal-upload-markdown <directory>')
     expect(command.scope, '--scope argument missing').to.be.ok
     expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
 
-    const config = {
-      clientId: command.clientId,
-      clientSecret: command.clientSecret,
-      hostname: command.host,
-      scope: command.scope,
-      tokenUrl: command.tokenUrl,
-      grantType: 'client_credentials'
-    }
+        const config = {
+            clientId: command.clientId,
+            clientSecret: command.clientSecret,
+            hostname: command.host,
+            scope: command.scope,
+            tokenUrl: command.tokenUrl,
+            grantType: 'client_credentials'
+        }
 
-    const portal = new Portal(config)
+        const portal = new Portal(config)
 
     let archive = archiver('zip')
     archive.directory(directory, false)
