@@ -35,17 +35,8 @@ module.exports = async (config, manifest) => {
       scope: product.scopes ? product.scopes.join(',') : ''
     }
 
-    const current = await productModel.findById(product.name)
-    if (current.statusCode === 404) {
-      const response = await productModel.create(newProduct)
-      const body = JSON.parse(response.body)
-      if (body.error) {
-        console.error(body.error.message.value)
-        process.exitCode = 1;
-      } else {
-        console.log('Created product: '+ newProduct.name)
-      }
-    } else {
+    try {
+      const current = await productModel.findById(product.name)
       const currentProduct = JSON.parse(current.body)
       const add = product.proxies.filter(proxy => !currentProduct.d.apiProxies.results.find(res => res.name === proxy))
       const remove = currentProduct.d.apiProxies.results.filter(res => !product.proxies.find(proxy => res.name === proxy)).map(res => res.name)
@@ -63,6 +54,20 @@ module.exports = async (config, manifest) => {
         }
       } else {
         console.log('Product up to date: '+ newProduct.name)
+      }
+    } catch (e) {
+      if (e.message.includes('not be found')) {
+        const response = await productModel.create(newProduct)
+        const body = JSON.parse(response.body)
+        if (body.error) {
+          console.error(body.error.message.value)
+          process.exitCode = 1;
+        } else {
+          console.log('Created product: '+ newProduct.name)
+        }
+      } else {
+        console.log(e.message)
+        process.exitCode = 1
       }
     }
   })

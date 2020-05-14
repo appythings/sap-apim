@@ -61,7 +61,7 @@ module.exports = async (config, manifest) => {
       console.log('Provider up to date')
     }
   } catch (e) {
-    if (e.message.includes('not found')) {
+    if (e.message.includes('not be found')) {
       if (providerConfig.managedByProxy === true) {
         const result = await provider.create(newProvider)
         console.log('Created provider')
