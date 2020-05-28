@@ -86,4 +86,5 @@ Use in combination with [sapim](https://www.npmjs.com/package/sapim)
 ```
 sap-apim kvms <manifest>
 sap-apim kvms manifest.yaml
+sap-apim kvms manifest.yaml --purgeDeleted // Deletes entries from the KVM that are not in the Manifest
 ```
