@@ -15,7 +15,7 @@ const isUpdated = (a, b, properties) => {
   })
 }
 
-module.exports = async (config, manifest) => {
+module.exports = async (config, manifest, purgeDeleted) => {
   const kvmModel = new Kvm(config)
   let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
   const kvmConfig = yml.kvms
@@ -37,7 +37,7 @@ module.exports = async (config, manifest) => {
     try {
       const current = await kvmModel.findById(kvmName)
       const currentkvm = JSON.parse(current.body)
-      await kvmModel.update(newkvm, currentkvm.d)
+      await kvmModel.update(newkvm, currentkvm.d, purgeDeleted)
       console.log('Updated kvm: ' + newkvm.name)
     } catch (e) {
       if (e.message.includes('not be found')) {

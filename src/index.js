@@ -42,8 +42,9 @@ program.command('products <manifest>')
   .action(manifest => updateProducts(build().config, manifest))
 
 program.command('kvms <manifest>')
+  .option('--purgeDeleted', 'Deletes all entries in the KVM that are not in the Manifest.', false)
   .description('creates or updates a list of kvms based on the given manifest')
-  .action(manifest => updateKvms(build().config, manifest))
+  .action((manifest, command) => updateKvms(build().config, manifest, command.purgeDeleted))
 
 program.command('documentation <swagger> <apiProxyFolder>')
   .option('-h, --host <host>', 'add the hostname for the SAP environment', null)
