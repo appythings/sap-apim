@@ -69,3 +69,21 @@ Use in combination with [sapim](https://www.npmjs.com/package/sapim)
 sap-apim documentation <spec> <outputFolder>
 sap-apim documentation ./openapi.yml ./APIProxy
 ```
+
+# To manage KVMs
+This command will create / update / delete the key-values in your KVMs.
+
+Create a yaml file with the following contents, or add this to your current yaml file:
+```yml
+kvms:
+  test:
+    key1: value1
+    key2: value2
+```
+
+## Use
+Use in combination with [sapim](https://www.npmjs.com/package/sapim)
+```
+sap-apim kvms <manifest>
+sap-apim kvms manifest.yaml
+```

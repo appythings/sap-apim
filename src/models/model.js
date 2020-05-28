@@ -96,7 +96,7 @@ module.exports = class Model {
   async sendBatch(q) {
     // Workaround because the SAP odata APIs require only the last part of the URL
     q._batch.ops = q._batch.ops.map((op) => ({
-      ...op, query: op.query.split('/Management.svc/').pop().replace('%3D', '='),
+      ...op, query: op.query.split('/Management.svc/').pop().replaceAll('%3D', '=').replaceAll('%2C', ','),
     }));
     return this.processBatchResponse(await q.send().then(this.handleResponse));
   }
