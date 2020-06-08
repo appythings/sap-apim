@@ -25,26 +25,32 @@ function build () {
   }
 }
 
+function handleError (e) {
+  console.error('ERROR:')
+  console.error(e.message)
+  process.exit(1)
+}
+
 program.name(name)
-    .version(version, '-v, --version')
-    .description(description)
-    .option('-s, --silent', 'suppress console output')
-    .option('-e, --env <path>', 'load environment variables from the given file')
-    .option('-c, --config <path>', 'load the given configuration file')
-    .option('-d, --debug', 'show debug messages')
+  .version(version, '-v, --version')
+  .description(description)
+  .option('-s, --silent', 'suppress console output')
+  .option('-e, --env <path>', 'load environment variables from the given file')
+  .option('-c, --config <path>', 'load the given configuration file')
+  .option('-d, --debug', 'show debug messages')
 
 program.command('provider <manifest>')
-    .description('creates or updates a provider based on the given manifest')
-    .action(manifest => updateProvider(build().config, manifest))
+  .description('creates or updates a provider based on the given manifest')
+  .action(manifest => updateProvider(build().config, manifest).catch(handleError))
 
 program.command('products <manifest>')
   .description('creates or updates a list of products based on the given manifest')
-  .action(manifest => updateProducts(build().config, manifest))
+  .action(manifest => updateProducts(build().config, manifest.catch(handleError)))
 
 program.command('kvms <manifest>')
   .option('--purgeDeleted', 'Deletes all entries in the KVM that are not in the Manifest.', false)
   .description('creates or updates a list of kvms based on the given manifest')
-  .action((manifest, command) => updateKvms(build().config, manifest, command.purgeDeleted))
+  .action((manifest, command) => updateKvms(build().config, manifest, command.purgeDeleted).catch(handleError))
 
 program.command('documentation <swagger> <apiProxyFolder>')
   .option('-h, --host <host>', 'add the hostname for the SAP environment', null)
@@ -75,8 +81,8 @@ program.command('documentation <swagger> <apiProxyFolder>')
     fs.writeFile(`${apiProxyFolder}/index.xml`, proxyFile.replace(regex, endpoints[0]))
     await fs.remove('./downloaded')
 
-        console.log('Succesfully created API documentation')
-    })
+    console.log('Succesfully created API documentation')
+  })
 
 program.command('devportal-upload-spec <openapispec>')
   .option('--environment <environment>', 'add the environment to deploy this to', null)
@@ -97,25 +103,25 @@ program.command('devportal-upload-spec <openapispec>')
     expect(command.scope, '--scope argument missing').to.be.ok
     expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
 
-        const config = {
-            product: command.product,
-            environment: command.environment,
-            clientId: command.clientId,
-            clientSecret: command.clientSecret,
-            hostname: command.host,
-            scope: command.scope,
-            tokenUrl: command.tokenUrl,
-            grantType: 'client_credentials',
-            force: command.force
-        }
+    const config = {
+      product: command.product,
+      environment: command.environment,
+      clientId: command.clientId,
+      clientSecret: command.clientSecret,
+      hostname: command.host,
+      scope: command.scope,
+      tokenUrl: command.tokenUrl,
+      grantType: 'client_credentials',
+      force: command.force
+    }
 
-        const portal = new Portal(config)
+    const portal = new Portal(config)
 
-        portal.pushSwagger(openapispec).catch(error => {
-            console.log(error)
-            process.exit(1)
-        })
+    portal.pushSwagger(openapispec).catch(error => {
+      console.log(error)
+      process.exit(1)
     })
+  })
 
 program.command('devportal-upload-markdown <directory>')
   .option('-h, --host <host>', 'add the hostname for the developer portal', null)
@@ -131,16 +137,16 @@ program.command('devportal-upload-markdown <directory>')
     expect(command.scope, '--scope argument missing').to.be.ok
     expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
 
-        const config = {
-            clientId: command.clientId,
-            clientSecret: command.clientSecret,
-            hostname: command.host,
-            scope: command.scope,
-            tokenUrl: command.tokenUrl,
-            grantType: 'client_credentials'
-        }
+    const config = {
+      clientId: command.clientId,
+      clientSecret: command.clientSecret,
+      hostname: command.host,
+      scope: command.scope,
+      tokenUrl: command.tokenUrl,
+      grantType: 'client_credentials'
+    }
 
-        const portal = new Portal(config)
+    const portal = new Portal(config)
 
     let archive = archiver('zip')
     archive.directory(directory, false)
