@@ -45,7 +45,7 @@ program.command('provider <manifest>')
 
 program.command('products <manifest>')
   .description('creates or updates a list of products based on the given manifest')
-  .action(manifest => updateProducts(build().config, manifest.catch(handleError)))
+  .action(manifest => updateProducts(build().config, manifest).catch(handleError))
 
 program.command('kvms <manifest>')
   .option('--purgeDeleted', 'Deletes all entries in the KVM that are not in the Manifest.', false)
