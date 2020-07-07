@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const Apiproduct = require('./models/apiproduct')
+const Apiproxy = require('./models/api-proxy')
 const yaml = require('js-yaml')
 const fs = require('fs')
 
@@ -15,6 +16,7 @@ const isUpdated = (a, b, properties) => {
 
 module.exports = async (config, manifest) => {
   const productModel = new Apiproduct(config)
+  const proxyModel = new Apiproxy(config)
   let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
   const productConfig = yml.products
   if (!productConfig) {
@@ -39,10 +41,15 @@ module.exports = async (config, manifest) => {
       const current = await productModel.findById(product.name)
       const currentProduct = JSON.parse(current.body)
       const add = product.proxies.filter(proxy => !currentProduct.d.apiProxies.results.find(res => res.name === proxy))
+      const actualAdd = []
+      for(const index in add){
+        await proxyModel.findById(add[index]).then(() => actualAdd.push(add[index])).catch(e => {
+          console.log(`proxy ${add[index]} does not exist.`)
+        })
+      }
       const remove = currentProduct.d.apiProxies.results.filter(res => !product.proxies.find(proxy => res.name === proxy)).map(res => res.name)
-
-      if (add.length > 0 || remove.length > 0 || isUpdated(currentProduct.d, newProduct, ['description', 'quotaCount', 'quotaInterval', 'quotaTimeUnit'])) {
-        const errors = await productModel.update(newProduct, product.name, add, remove)
+      if (actualAdd.length > 0 || remove.length > 0 || isUpdated(currentProduct.d, newProduct, ['description', 'quotaCount', 'quotaInterval', 'quotaTimeUnit'])) {
+        const errors = await productModel.update(newProduct, product.name, actualAdd, remove)
         errors.forEach(response => {
           if (response.error) {
             console.error(response.error.message.value)
