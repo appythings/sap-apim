@@ -56,32 +56,37 @@ program.command('documentation <swagger> <apiProxyFolder>')
   .option('-h, --host <host>', 'add the hostname for the SAP environment', null)
   .description('creates or updates a list of products based on the given manifest')
   .action(async (swagger, apiProxyFolder, command) => {
-    if (!await fs.pathExists(swagger)) {
-      throw new Error('Path ' + swagger + ' does not exist.')
-    }
-    if (!await fs.pathExists(apiProxyFolder)) {
-      throw new Error('Path ' + apiProxyFolder + ' does not exist.')
-    }
-    const sapimBuild = build()
-    const name = await createDocumentation(sapimBuild.config, swagger, command.host)
-    const apiProxyModel = new apiProxy(sapimBuild.config)
-    await apiProxyModel.download(name, './downloaded')
-    await apiProxyModel.delete({name})
-    await fs.remove(apiProxyFolder + '/Documentation')
-    await fs.remove(apiProxyFolder + '/APIResource')
-    const json = await fs.readJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html')
-    json.basePath = json.basePath.replace('/' + name, '')
-    await fs.writeJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html', json)
-    await fs.move('./downloaded/APIProxy/Documentation', apiProxyFolder + '/Documentation')
-    await fs.move('./downloaded/APIProxy/APIResource', apiProxyFolder + '/APIResource')
-    const file = await fs.readFile(`./downloaded/APIProxy/${name}.xml`, 'utf8')
-    const regex = /<proxyEndPoints>[\s\S]*<\/proxyEndPoints>/
-    const endpoints = file.match(regex)
-    const proxyFile = await fs.readFile(`${apiProxyFolder}/index.xml`, 'utf8')
-    fs.writeFile(`${apiProxyFolder}/index.xml`, proxyFile.replace(regex, endpoints[0]))
-    await fs.remove('./downloaded')
+    try{
+      if (!await fs.pathExists(swagger)) {
+        throw new Error('Path ' + swagger + ' does not exist.')
+      }
+      if (!await fs.pathExists(apiProxyFolder)) {
+        throw new Error('Path ' + apiProxyFolder + ' does not exist.')
+      }
+      const sapimBuild = build()
+      const name = await createDocumentation(sapimBuild.config, swagger, command.host)
+      const apiProxyModel = new apiProxy(sapimBuild.config)
+      await apiProxyModel.download(name, './downloaded')
+      await apiProxyModel.delete({name})
+      await fs.remove(apiProxyFolder + '/Documentation')
+      await fs.remove(apiProxyFolder + '/APIResource')
+      const json = await fs.readJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html')
+      json.basePath = json.basePath.replace('/' + name, '')
+      await fs.writeJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html', json)
+      await fs.move('./downloaded/APIProxy/Documentation', apiProxyFolder + '/Documentation')
+      await fs.move('./downloaded/APIProxy/APIResource', apiProxyFolder + '/APIResource')
+      const file = await fs.readFile(`./downloaded/APIProxy/${name}.xml`, 'utf8')
+      const regex = /<proxyEndPoints>[\s\S]*<\/proxyEndPoints>/
+      const endpoints = file.match(regex)
+      const proxyFile = await fs.readFile(`${apiProxyFolder}/index.xml`, 'utf8')
+      fs.writeFile(`${apiProxyFolder}/index.xml`, proxyFile.replace(regex, endpoints[0]))
+      await fs.remove('./downloaded')
 
-    console.log('Succesfully created API documentation')
+      console.log('Succesfully created API documentation')
+    } catch (e) {
+      console.log(e.message)
+      process.exit(1)
+    }
   })
 
 program.command('devportal-upload-spec <openapispec>')
