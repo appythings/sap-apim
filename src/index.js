@@ -54,6 +54,7 @@ program.command('kvms <manifest>')
 
 program.command('documentation <swagger> <apiProxyFolder>')
   .option('-h, --host <host>', 'add the hostname for the SAP environment', null)
+  .option('-p, --proxyFileName <proxyFileName>', 'To use an alternative name for the file in the index of the APIProxy folder', 'index.xml')
   .description('creates or updates a list of products based on the given manifest')
   .action(async (swagger, apiProxyFolder, command) => {
     try{
@@ -78,8 +79,8 @@ program.command('documentation <swagger> <apiProxyFolder>')
       const file = await fs.readFile(`./downloaded/APIProxy/${name}.xml`, 'utf8')
       const regex = /<proxyEndPoints>[\s\S]*<\/proxyEndPoints>/
       const endpoints = file.match(regex)
-      const proxyFile = await fs.readFile(`${apiProxyFolder}/index.xml`, 'utf8')
-      fs.writeFile(`${apiProxyFolder}/index.xml`, proxyFile.replace(regex, endpoints[0]))
+      const proxyFile = await fs.readFile(`${apiProxyFolder}/${command.proxyFileName}`, 'utf8')
+      fs.writeFile(`${apiProxyFolder}/${command.proxyFileName}`, proxyFile.replace(regex, endpoints[0]))
       await fs.remove('./downloaded')
 
       console.log('Succesfully created API documentation')
