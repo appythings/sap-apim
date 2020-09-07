@@ -48,7 +48,7 @@ module.exports = async (config, manifest) => {
         })
       }
       const remove = currentProduct.d.apiProxies.results.filter(res => !product.proxies.find(proxy => res.name === proxy)).map(res => res.name)
-      if (actualAdd.length > 0 || remove.length > 0 || isUpdated(currentProduct.d, newProduct, ['description', 'quotaCount', 'quotaInterval', 'quotaTimeUnit'])) {
+      if (actualAdd.length > 0 || remove.length > 0 || isUpdated(currentProduct.d, newProduct, ['description', 'title', 'quotaCount', 'quotaInterval', 'quotaTimeUnit', 'scope'])) {
         const errors = await productModel.update(newProduct, product.name, actualAdd, remove)
         errors.forEach(response => {
           if (response.error) {
