@@ -28,7 +28,7 @@
     "@apidevtools/swagger-parser": "^9.0.1",
     "api-spec-converter": "^2.11.0",
     "archiver": "^3.1.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "chai": "^4.2.0",
     "commander": "^4.1.1",
     "dotenv": "^8.2.0",
