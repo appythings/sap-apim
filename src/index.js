@@ -92,12 +92,12 @@ program.command('documentation <swagger> <apiProxyFolder>')
 
 program.command('devportal-upload-spec <openapispec>')
   .option('--environment <environment>', 'add the environment to deploy this to', null)
-  .option('--host <host>', 'add the hostname for the developer portal', null)
-  .option('--product <product>', 'add the name of the SAP product to link the documentation to', null)
+  .option('--host <host>', 'add the hostname for the developer portal (backend) without the scheme.', null)
+  .option('--product <product>', 'add the name of the product to link the documentation to', null)
   .option('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
   .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', null)
   .option('--scope <scope>', 'add the scope for the developer portal app registration', null)
-  .option('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider', null)
+  .option('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider (ex: https://login.microsoftonline.com/yourcompany.onmicrosoft.com/oauth2/v2.0/token)', null)
   .option('--force <force>', 'Force the database to overwrite spec regardless of version number', null)
   .description('uploads an openapi spec to the developer portal')
   .action((openapispec, command) => {
@@ -130,22 +130,18 @@ program.command('devportal-upload-spec <openapispec>')
   })
 
 program.command('devportal-upload-markdown <directory>')
-  .option('-h, --host <host>', 'add the hostname for the developer portal', null)
-  .option('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
+  .requiredOption('-h, --host <host>', 'add the hostname for the developer portal', null)
+  .requiredOption('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
   .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', null)
-  .option('--scope <scope>', 'add the scope for the developer portal app registration', null)
-  .option('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider', null)
+  .option('--aud <aud>', 'Only used in combination with client certificate authentication instead of clientSecret. Provide the audience for the client token.', null)
+  .requiredOption('--scope <scope>', 'add the scope for the developer portal app registration', null)
+  .requiredOption('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider', null)
   .description('uploads a directory of markdown files to the developer portal')
   .action(async (directory, command) => {
-    expect(command.host, '--host argument missing').to.be.ok
-    expect(command.clientId, '--clientId argument missing').to.be.ok
-    expect(command.clientSecret, '--clientSecret argument missing').to.be.ok
-    expect(command.scope, '--scope argument missing').to.be.ok
-    expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
-
     const config = {
       clientId: command.clientId,
       clientSecret: command.clientSecret,
+      aud: command.aud,
       hostname: command.host,
       scope: command.scope,
       tokenUrl: command.tokenUrl,
