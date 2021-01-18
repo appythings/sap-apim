@@ -12,6 +12,13 @@ module.exports = class Model {
   }
 
   async getHeaders (count = 0) {
+    if(this.auth.bearer){
+      return {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.auth.bearer}`
+      }
+    }
     try {
       const optionHeaders = {
         method: this.loginMethod,
@@ -23,6 +30,7 @@ module.exports = class Model {
         },
         resolveWithFullResponse: true
       }
+      console.log(optionHeaders)
       const response = await request(optionHeaders)
       const returnHeaders = {
         Accept: 'application/json',
