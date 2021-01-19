@@ -30,7 +30,6 @@ module.exports = class Model {
         },
         resolveWithFullResponse: true
       }
-      console.log(optionHeaders)
       const response = await request(optionHeaders)
       const returnHeaders = {
         Accept: 'application/json',

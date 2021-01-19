@@ -104,7 +104,11 @@ program.command('documentation <swagger> <apiProxyFolder>')
             await fs.remove(apiProxyFolder + '/Documentation')
             await fs.remove(apiProxyFolder + '/APIResource')
             const json = await fs.readJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html')
-            json.basePath = json.basePath.replace('/' + name, '')
+            if(json.swagger === '2.0') {
+                json.basePath = json.basePath.replace('/' + name, '')
+            }else{
+                json.servers = json.servers.map(server => ({url: server.url.replace(name, '')}))
+            }
             await fs.writeJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html', json)
             await fs.move('./downloaded/APIProxy/Documentation', apiProxyFolder + '/Documentation')
             await fs.move('./downloaded/APIProxy/APIResource', apiProxyFolder + '/APIResource')

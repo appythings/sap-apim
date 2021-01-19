@@ -17,26 +17,20 @@ const readSwaggerFile = (swaggerFile) => {
   throw new Error('Openapi spec must be either yaml/yml or json')
 }
 
-const convertSwagger = async (swagger) => {
-  if(swagger.swagger === '2.0'){
-    return swagger
-  }
-  const converted = await converter.convert({
-    from: 'openapi_3',
-    to: 'swagger_2',
-    source: swagger,
-  })
-  return converted.spec
-}
-
 module.exports = async (config, swaggerFile, host) => {
   const apiModel = new Api(config)
-  const swagger = await convertSwagger(readSwaggerFile(swaggerFile))
+  const swagger = readSwaggerFile(swaggerFile)
   const name = uuid.v4()
-  if(host) {
-    swagger.host = host;
+  if(swagger.swagger === '2.0') {
+    swagger.basePath = '/' + name + swagger.basePath
+  }else{
+    swagger.servers = swagger.servers.map(server => {
+      const url = server.url.match(/(http[s]?:\/\/)?([^\/\s]+\/)(.*)/)
+      return {
+        url: url[1] + url[2] + name + url[3]
+      }
+    })
   }
-  swagger.basePath = '/' + name + swagger.basePath
   await apiModel.create({name: name, content: JSON.stringify(swagger)})
   return name
 }
