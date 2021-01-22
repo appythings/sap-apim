@@ -4,6 +4,7 @@ const SwaggerParser = require("@apidevtools/swagger-parser");
 const yaml = require('js-yaml')
 const fs = require('fs-extra')
 const FormData = require('form-data')
+const jwt = require('../lib/jwt')
 
 class Portal {
     constructor(config) {
@@ -25,13 +26,23 @@ class Portal {
             'grant_type': this.config.grantType,
             'scope': this.config.scope
         }
+        if (process.env.PRIVATE_KEY_BASE64 && process.env.PUBLIC_KEY_BASE64) {
+            const privateKey = Buffer.from(process.env.AAD_PRIVATE_KEY_BASE64, 'base64')
+                .toString('utf8');
+            const publicKey = Buffer.from(process.env.AAD_PUBLIC_KEY_BASE64, 'base64')
+                .toString('utf8');
+            const token = jwt.create(this.config.clientId, privateKey,
+                publicKey, this.config.aud);
+            data.client_assertion = token;
+            data.client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
+        }
         const options = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             data: qs.stringify(data),
-            url: `https://${this.config.tokenUrl}/token`
+            url: `https://${this.config.tokenUrl}`
         }
         const response = await axios(options)
         this.request.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.access_token
@@ -50,30 +61,30 @@ class Portal {
     }
 
     async pushSwagger(swagger) {
-      const parsedSwagger = await this.readSwaggerFile(swagger)
-      await SwaggerParser.validate(swagger);
-      await this.login()
+        const parsedSwagger = await this.readSwaggerFile(swagger)
+        await SwaggerParser.validate(swagger);
+        await this.login()
         return this.request.post(`api/environments/${this.config.environment}/apiproducts/${this.config.product}/specs${this.config.force ? '?force=true' : ""}`, {
             "environmentId": this.config.environment,
             'spec': parsedSwagger
         })
     }
 
-  async pushMarkdown (zipFile) {
-    await this.login()
-    const form = new FormData()
-    form.append('zip', zipFile, {
-      filename: 'markdown.zip'
-    })
-    return axios.post(`http://${this.config.hostname}/markdown`,
-      form.getBuffer(),
-      {
-        headers: {
-          ...form.getHeaders(),
-          Authorization: this.request.defaults.headers.common['Authorization']
-        }
-      })
-  }
+    async pushMarkdown(zipFile) {
+        await this.login()
+        const form = new FormData()
+        form.append('zip', zipFile, {
+            filename: 'markdown.zip'
+        })
+        return axios.post(`http://${this.config.hostname}/markdown`,
+            form.getBuffer(),
+            {
+                headers: {
+                    ...form.getHeaders(),
+                    Authorization: this.request.defaults.headers.common['Authorization']
+                }
+            })
+    }
 }
 
 module.exports = Portal

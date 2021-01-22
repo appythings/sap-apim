@@ -1,7 +1,7 @@
 {
   "name": "sap-apim",
   "bin": "src/index.js",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "Commandline tool to use the management APIs of SAP API Management",
   "main": "src/index.js",
   "scripts": {
@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/reiniervanderhoeven/sap-apim#readme",
   "dependencies": {
-    "minimist": ">=0.2.1",
     "@apidevtools/swagger-parser": "^9.0.1",
     "api-spec-converter": "^2.11.0",
     "archiver": "^3.1.1",
@@ -35,14 +34,17 @@
     "form-data": "^3.0.0",
     "fs-extra": "^8.1.0",
     "js-yaml": "^3.14.0",
+    "jsonwebtoken": "^8.5.1",
+    "jsrsasign": "^10.1.4",
     "mem": "^6.1.0",
     "memorystream": "^0.3.1",
+    "minimist": ">=0.2.1",
     "odata-client": "^0.6.13",
     "qs": "^6.9.4",
     "request-promise": "^4.2.5",
     "sapim": "0.0.7",
     "stream-to-promise": "^2.2.0",
-    "unzip-stream": "^0.3.0",
+    "unzip-stream": "^0.3.1",
     "uuid": "^7.0.3",
     "yargs": "latest"
   },
