@@ -73,7 +73,7 @@ program.command("deploy <manifest>")
 
 program.command("package <manifest> [target_archive]")
     .description("deploy API manager artifacts described by the given manifest")
-    .action(manifest => build().packageManifest(manifest, target_archive));
+    .action((manifest, target_archive) => build().packageManifest(manifest, target_archive));
 
 program.command("upload-proxy <archive>")
     .description("Package the API proxy described by the given manifest into an archive.")
