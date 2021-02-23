@@ -71,6 +71,14 @@ program.command("deploy <manifest>")
     .description("deploy API manager artifacts described by the given manifest")
     .action(manifest => build().deployManifest(manifest));
 
+program.command("package <manifest> [target_archive]")
+    .description("deploy API manager artifacts described by the given manifest")
+    .action((manifest, target_archive) => build().packageManifest(manifest, target_archive));
+
+program.command("upload-proxy <archive>")
+    .description("Package the API proxy described by the given manifest into an archive.")
+    .action(manifest => build().uploadProxy(archive));
+
 program.command('provider <manifest>')
     .description('creates or updates a provider based on the given manifest')
     .action(manifest => updateProvider(build().config, manifest).catch(handleError))
