@@ -77,7 +77,7 @@ program.command("package <manifest> [target_archive]")
 
 program.command("upload-proxy <archive>")
     .description("Package the API proxy described by the given manifest into an archive.")
-    .action(manifest => build().uploadProxy(archive));
+    .action(archive => build().uploadProxy(archive));
 
 program.command('provider <manifest>')
     .description('creates or updates a provider based on the given manifest')
