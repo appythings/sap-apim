@@ -18,7 +18,8 @@ const expect = chai.expect
 
 function build() {
     const currentLoggerLevel = sapim.logger.level
-    if (program.access_token) {
+    const access_token = program.access_token || process.env.SAPIM_ACCESS_TOKEN
+    if (access_token) {
         process.env['SAPIM_USERNAME'] = 'unimplemented'
         process.env['SAPIM_PASSWORD'] = 'unimplemented'
         sapim.logger.level = 100 // silence logging because the first CSRF-token call will generate an error
@@ -29,8 +30,8 @@ function build() {
         dotenv.config()
     }
     const sapimInstance = sapim.default()
-    if (program.access_token) {
-        CloudFoundry.updateSapimClient(sapimInstance, program.access_token, sapim.logger, currentLoggerLevel)
+    if (access_token) {
+        CloudFoundry.updateSapimClient(sapimInstance, access_token, sapim.logger, currentLoggerLevel)
     }
     return sapimInstance
 }
@@ -77,7 +78,7 @@ program.command("package <manifest> [target_archive]")
 
 program.command("upload-proxy <archive>")
     .description("Package the API proxy described by the given manifest into an archive.")
-    .action(manifest => build().uploadProxy(archive));
+    .action(archive => build().uploadProxy(archive));
 
 program.command('provider <manifest>')
     .description('creates or updates a provider based on the given manifest')
