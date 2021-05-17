@@ -18,8 +18,7 @@ const expect = chai.expect
 
 function build() {
     const currentLoggerLevel = sapim.logger.level
-    const access_token = program.access_token || process.env.SAPIM_ACCESS_TOKEN
-    if (access_token) {
+    if (program.access_token) {
         process.env['SAPIM_USERNAME'] = 'unimplemented'
         process.env['SAPIM_PASSWORD'] = 'unimplemented'
         sapim.logger.level = 100 // silence logging because the first CSRF-token call will generate an error
@@ -30,8 +29,8 @@ function build() {
         dotenv.config()
     }
     const sapimInstance = sapim.default()
-    if (access_token) {
-        CloudFoundry.updateSapimClient(sapimInstance, access_token, sapim.logger, currentLoggerLevel)
+    if (program.access_token) {
+        CloudFoundry.updateSapimClient(sapimInstance, program.access_token, sapim.logger, currentLoggerLevel)
     }
     return sapimInstance
 }
@@ -49,14 +48,14 @@ program.name(name)
     .option('-e, --env <path>', 'load environment variables from the given file')
     .option('-c, --config <path>', 'load the given configuration file')
     .option('-d, --debug', 'show debug messages')
-    .option('-a, --access_token <access_token>', 'set access_token')
+    .option('-a, --access_token <access_token>', 'set access_token', process.env.SAPIM_ACCESS_TOKEN)
 
 
 program.command("cf-login")
     .description("Returns an access-token for Cloud Foundry")
-    .option('--tokenUrl <tokenUrl>', 'add the environment to deploy this to', null)
-    .option('--clientid <clientid>', 'add the environment to deploy this to', null)
-    .option('--secret <secret>', 'add the environment to deploy this to', null)
+    .option('--tokenUrl <tokenUrl>', 'add the environment to deploy this to', process.env.SAPIM_TOKENURL)
+    .option('--clientid <clientid>', 'add the environment to deploy this to', process.env.SAPIM_CLIENTID)
+    .option('--secret <secret>', 'add the environment to deploy this to', process.env.SAPIM_SECRET)
     .action(async (command) => {
         const cf = new CloudFoundry({
             tokenUrl: command.tokenUrl, auth: {
