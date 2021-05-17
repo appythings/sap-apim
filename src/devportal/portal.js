@@ -27,9 +27,9 @@ class Portal {
             'scope': this.config.scope
         }
         if (process.env.PRIVATE_KEY_BASE64 && process.env.PUBLIC_KEY_BASE64) {
-            const privateKey = Buffer.from(process.env.AAD_PRIVATE_KEY_BASE64, 'base64')
+            const privateKey = Buffer.from(process.env.PRIVATE_KEY_BASE64, 'base64')
                 .toString('utf8');
-            const publicKey = Buffer.from(process.env.AAD_PUBLIC_KEY_BASE64, 'base64')
+            const publicKey = Buffer.from(process.env.PUBLIC_KEY_BASE64, 'base64')
                 .toString('utf8');
             const token = jwt.create(this.config.clientId, privateKey,
                 publicKey, this.config.aud);
