@@ -10,7 +10,7 @@ class Portal {
     constructor(config) {
         this.config = config
         this.request = axios.create({
-            baseURL: `http://${this.config.hostname}`,
+            baseURL: this.config.hostname,
             timeout: 60000,
             headers: {
                 Accept: 'application/json',
@@ -31,9 +31,8 @@ class Portal {
                 .toString('utf8');
             const publicKey = Buffer.from(process.env.PUBLIC_KEY_BASE64, 'base64')
                 .toString('utf8');
-            const token = jwt.create(this.config.clientId, privateKey,
+            data.client_assertion = jwt.create(this.config.clientId, privateKey,
                 publicKey, this.config.aud);
-            data.client_assertion = token;
             data.client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
         }
         const options = {
@@ -42,7 +41,7 @@ class Portal {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             data: qs.stringify(data),
-            url: `https://${this.config.tokenUrl}`
+            url: this.config.tokenUrl
         }
         const response = await axios(options)
         this.request.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.access_token

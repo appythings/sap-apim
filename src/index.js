@@ -138,7 +138,7 @@ program.command('devportal-upload-spec <openapispec>')
     .requiredOption('--environment <environment>', 'add the environment to deploy this to', process.env.APIDEX_ENVIRONMENT)
     .requiredOption('--host <host>', 'add the hostname for the developer portal', process.env.APIDEX_HOST)
     .requiredOption('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_CLIENTID)
-    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', process.env.SECRET)
+    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_SECRET)
     .option('--aud <aud>', 'Only used in combination with client certificate authentication instead of clientSecret. Provide the audience for the client token.', null)
     .requiredOption('--scope <scope>', 'add the scope for the developer portal app registration', process.env.APIDEX_SCOPE)
     .requiredOption('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider (ex: https://login.microsoftonline.com/yourcompany.onmicrosoft.com/oauth2/v2.0/token)', process.env.APIDEX_TOKENURL)
@@ -161,7 +161,9 @@ program.command('devportal-upload-spec <openapispec>')
 
         const portal = new Portal(config)
 
-        portal.pushSwagger(openapispec).catch(error => {
+        portal.pushSwagger(openapispec).then(success => {
+            console.log('Successfully updated documentation')
+        }).catch(error => {
             console.log(error)
             process.exit(1)
         })
@@ -170,7 +172,7 @@ program.command('devportal-upload-spec <openapispec>')
 program.command('devportal-upload-markdown <directory>')
     .requiredOption('--host <host>', 'add the hostname for the developer portal', process.env.APIDEX_HOST)
     .requiredOption('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_CLIENTID)
-    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', process.env.SECRET)
+    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_SECRET)
     .option('--aud <aud>', 'Only used in combination with client certificate authentication instead of clientSecret. Provide the audience for the client token.', null)
     .requiredOption('--scope <scope>', 'add the scope for the developer portal app registration', process.env.APIDEX_SCOPE)
     .requiredOption('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider (ex: https://login.microsoftonline.com/yourcompany.onmicrosoft.com/oauth2/v2.0/token)', process.env.APIDEX_TOKENURL)
@@ -194,7 +196,7 @@ program.command('devportal-upload-markdown <directory>')
 
         const done = await streamToPromise(archive)
 
-        portal.pushMarkdown(done).then(() => console.log('Succefully pushed markdown to developer portal')).catch(error => {
+        portal.pushMarkdown(done).then(() => console.log('Successfully pushed markdown to developer portal')).catch(error => {
             console.log(error)
             process.exit(1)
         })
