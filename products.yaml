@@ -17,3 +17,4 @@ products:
     timeunit: minute
     proxies:
       - echoheaders
+    openapi: swagger.json

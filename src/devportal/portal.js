@@ -7,7 +7,12 @@ const FormData = require('form-data')
 const jwt = require('../lib/jwt')
 
 class Portal {
-    constructor(config) {
+    constructor(manifest, config) {
+        let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
+        const productConfig = yml.products
+        if (!productConfig || !productConfig.find(product => product.openapi)) {
+            throw new Error('no product found to upload')
+        }
         this.config = config
         this.request = axios.create({
             baseURL: this.config.hostname,
@@ -17,9 +22,13 @@ class Portal {
                 'Content-Type': 'application/json'
             }
         })
+        this.swaggerFiles = productConfig.filter(product => product.openapi)
     }
 
     async login() {
+        if(this.request.defaults.headers.common['Authorization']){
+            return
+        }
         const data = {
             'client_id': this.config.clientId,
             'client_secret': this.config.clientSecret,
@@ -59,14 +68,17 @@ class Portal {
         throw new Error('Openapi spec must be either yaml/yml or json')
     }
 
-    async pushSwagger(swagger) {
-        const parsedSwagger = await this.readSwaggerFile(swagger)
-        await SwaggerParser.validate(swagger);
-        await this.login()
-        return this.request.post(`api/environments/${this.config.environment}/apiproducts/${this.config.product}/specs${this.config.force ? '?force=true' : ""}`, {
-            "environmentId": this.config.environment,
-            'spec': parsedSwagger
-        })
+    async pushSwagger() {
+        return Promise.all(this.swaggerFiles.map(async product => {
+            console.log(`Uploading ${product.openapi} for product: ${product.name}`)
+            const parsedSwagger = await this.readSwaggerFile(product.openapi)
+            await SwaggerParser.validate(product.openapi);
+            await this.login()
+            return this.request.post(`api/environments/${this.config.environment}/apiproducts/${product.name}/specs${this.config.force ? '?force=true' : ""}`, {
+                "environmentId": this.config.environment,
+                'spec': parsedSwagger
+            })
+        }))
     }
 
     async pushMarkdown(zipFile) {
