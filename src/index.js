@@ -112,9 +112,9 @@ program.command('documentation <swagger> <apiProxyFolder>')
             await fs.remove(apiProxyFolder + '/Documentation')
             await fs.remove(apiProxyFolder + '/APIResource')
             const json = await fs.readJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html')
-            if(json.swagger === '2.0') {
+            if (json.swagger === '2.0') {
                 json.basePath = json.basePath.replace('/' + name, '')
-            }else{
+            } else {
                 json.servers = json.servers.map(server => ({url: server.url.replace(name, '')}))
             }
             await fs.writeJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html', json)
@@ -134,30 +134,22 @@ program.command('documentation <swagger> <apiProxyFolder>')
         }
     })
 
-program.command('devportal-upload-spec <openapispec>')
-    .option('--environment <environment>', 'add the environment to deploy this to', null)
-    .option('--host <host>', 'add the hostname for the developer portal (backend) without the scheme.', null)
-    .option('--product <product>', 'add the name of the product to link the documentation to', null)
-    .option('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
-    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', null)
-    .option('--scope <scope>', 'add the scope for the developer portal app registration', null)
-    .option('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider (ex: https://login.microsoftonline.com/yourcompany.onmicrosoft.com/oauth2/v2.0/token)', null)
-    .option('--force <force>', 'Force the database to overwrite spec regardless of version number', null)
+program.command('devportal-upload-spec <manifest>')
+    .requiredOption('--environment <environment>', 'add the environment to deploy this to', process.env.APIDEX_ENVIRONMENT)
+    .requiredOption('--host <host>', 'add the hostname for the developer portal', process.env.APIDEX_HOST)
+    .requiredOption('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_CLIENTID)
+    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_SECRET)
+    .option('--aud <aud>', 'Only used in combination with client certificate authentication instead of clientSecret. Provide the audience for the client token.', null)
+    .requiredOption('--scope <scope>', 'add the scope for the developer portal app registration', process.env.APIDEX_SCOPE)
+    .requiredOption('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider (ex: https://login.microsoftonline.com/yourcompany.onmicrosoft.com/oauth2/v2.0/token)', process.env.APIDEX_TOKENURL)
+    .option('--force', 'Force the database to overwrite spec regardless of version number', false)
     .description('uploads an openapi spec to the developer portal')
-    .action((openapispec, command) => {
-        expect(command.environment, '--environment argument missing').to.be.ok
-        expect(command.host, '--host argument missing').to.be.ok
-        expect(command.product, '--product argument missing').to.be.ok
-        expect(command.clientId, '--clientId argument missing').to.be.ok
-        expect(command.clientSecret, '--clientSecret argument missing').to.be.ok
-        expect(command.scope, '--scope argument missing').to.be.ok
-        expect(command.tokenUrl, '--tokenUrl argument missing').to.be.ok
-
+    .action((manifest, command) => {
         const config = {
-            product: command.product,
             environment: command.environment,
             clientId: command.clientId,
             clientSecret: command.clientSecret,
+            aud: command.aud,
             hostname: command.host,
             scope: command.scope,
             tokenUrl: command.tokenUrl,
@@ -165,21 +157,27 @@ program.command('devportal-upload-spec <openapispec>')
             force: command.force
         }
 
-        const portal = new Portal(config)
+        try {
+            const portal = new Portal(manifest, config)
 
-        portal.pushSwagger(openapispec).catch(error => {
-            console.log(error)
-            process.exit(1)
-        })
+            portal.pushSwagger().then(success => {
+                console.log('Successfully updated documentation')
+            }).catch(error => {
+                console.log(error.response ? error.response.data : error)
+                process.exit(1)
+            })
+        } catch (e) {
+            console.log(e.message)
+        }
     })
 
 program.command('devportal-upload-markdown <directory>')
-    .requiredOption('-h, --host <host>', 'add the hostname for the developer portal', null)
-    .requiredOption('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', null)
-    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', null)
+    .requiredOption('--host <host>', 'add the hostname for the developer portal', process.env.APIDEX_HOST)
+    .requiredOption('--clientId <clientId>', 'add the clientId from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_CLIENTID)
+    .option('--clientSecret <clientSecret>', 'add the clientSecret from your OpenID Connect provider linked to the developer portal', process.env.APIDEX_SECRET)
     .option('--aud <aud>', 'Only used in combination with client certificate authentication instead of clientSecret. Provide the audience for the client token.', null)
-    .requiredOption('--scope <scope>', 'add the scope for the developer portal app registration', null)
-    .requiredOption('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider', null)
+    .requiredOption('--scope <scope>', 'add the scope for the developer portal app registration', process.env.APIDEX_SCOPE)
+    .requiredOption('--tokenUrl <tokenUrl>', 'add the tokenUrl from your OpenID Connect provider (ex: https://login.microsoftonline.com/yourcompany.onmicrosoft.com/oauth2/v2.0/token)', process.env.APIDEX_TOKENURL)
     .description('uploads a directory of markdown files to the developer portal')
     .action(async (directory, command) => {
         const config = {
@@ -200,7 +198,7 @@ program.command('devportal-upload-markdown <directory>')
 
         const done = await streamToPromise(archive)
 
-        portal.pushMarkdown(done).then(() => console.log('Succefully pushed markdown to developer portal')).catch(error => {
+        portal.pushMarkdown(done).then(() => console.log('Successfully pushed markdown to developer portal')).catch(error => {
             console.log(error)
             process.exit(1)
         })
