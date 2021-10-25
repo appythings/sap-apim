@@ -25,9 +25,13 @@ module.exports = async (config, swaggerFile, host) => {
     swagger.basePath = '/' + name + swagger.basePath
   }else{
     swagger.servers = swagger.servers.map(server => {
-      const url = server.url.match(/(http[s]?:\/\/)?([^\/\s]+\/)(.*)/)
+      const url = server.url.match(/(http[s]?:\/\/)?([^\/\s]+\/?)(.*)/)
+      if(!url[2].endsWith('/')){
+        url[2] = `${url[2]}/`
+      }
+
       return {
-        url: url[1] + url[2] + name + url[3]
+        url: `${url[1]}${url[2]}${name}${url[3]}`
       }
     })
   }
