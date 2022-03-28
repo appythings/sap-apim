@@ -55,7 +55,15 @@ module.exports = class Model {
     if (response.statusCode >= 400) {
       throw new Error(response.body)
     }
-    return response
+
+    const parsed = JSON.parse(response.body);
+    if (parsed.d && parsed.d.results) {
+      return parsed.d.results.map(this.from);
+    }
+    if (Array.isArray(parsed)) {
+      return parsed.map(this.from);
+    }
+    return parsed.d ? this.from(parsed.d) : this.from(parsed);
   }
 
   async find (filter, orderby) {
@@ -67,28 +75,28 @@ module.exports = class Model {
     if (orderby) {
       q.orderby(orderby)
     }
-    return q.get().then(this.handleResponse)
+    return q.get().then(response => this.handleResponse(response))
   }
 
   async findById (id) {
     const q = await this.getOdataQuery(id)
-    return this.addFilters(q).get().then(this.handleResponse)
+    return this.addFilters(q).get().then(response => this.handleResponse(response))
   }
 
   async create (body) {
     const q = await this.getOdataQuery()
-    return q.post(this.to(body)).then(this.handleResponse)
+    return q.post(this.to(body)).then(response => this.handleResponse(response))
   }
 
   async update (body, id) {
     const q = await this.getOdataQuery(id)
-    return q.put(this.to(body)).then(this.handleResponse)
+    return q.put(this.to(body)).then(response => this.handleResponse(response))
   }
 
   async delete (id) {
     const q = await this.getOdataQuery(id)
     q.url.qurl.pathname = q.url.qurl.pathname.replace(/%3D/g, '=')
-    return q.delete().then(this.handleResponse)
+    return q.delete().then(response => this.handleResponse(response))
   }
 
   async getOdataQuery (id, service) {

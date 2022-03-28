@@ -8,11 +8,15 @@ const jwt = require('../lib/jwt')
 
 class Portal {
     constructor(manifest, config) {
-        let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
-        const productConfig = yml.products
-        if (!productConfig || !productConfig.find(product => product.openapi)) {
-            throw new Error('no product found to upload')
+        if (manifest) {
+            let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
+            const productConfig = yml.products
+            if (!productConfig || !productConfig.find(product => product.openapi)) {
+                throw new Error('no product found to upload')
+            }
+            this.swaggerFiles = productConfig.filter(product => product.openapi)
         }
+
         this.config = config
         this.request = axios.create({
             baseURL: this.config.hostname,
@@ -22,11 +26,10 @@ class Portal {
                 'Content-Type': 'application/json'
             }
         })
-        this.swaggerFiles = productConfig.filter(product => product.openapi)
     }
 
     async login() {
-        if(this.request.defaults.headers.common['Authorization']){
+        if (this.request.defaults.headers.common['Authorization']) {
             return
         }
         const data = {
