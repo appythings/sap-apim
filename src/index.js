@@ -6,6 +6,7 @@ const updateProvider = require('./provider')
 const updateProducts = require('./apiproduct')
 const updateKvms = require('./kvms')
 const createDocumentation = require('./documentation')
+const migrateApps = require('./application')
 const apiProxy = require('./models/api-proxy')
 const Portal = require('./devportal/portal')
 const CloudFoundry = require('./lib/cloudfoundry')
@@ -190,7 +191,7 @@ program.command('devportal-upload-markdown <directory>')
             grantType: 'client_credentials'
         }
 
-        const portal = new Portal(config)
+        const portal = new Portal(null, config)
 
         let archive = archiver('zip')
         archive.directory(directory, false)
@@ -203,5 +204,14 @@ program.command('devportal-upload-markdown <directory>')
             process.exit(1)
         })
     })
+
+program.command('migrate')
+    .requiredOption('--host <host>')
+    .description('creates or updates a list of kvms based on the given manifest')
+    .action((command) => migrateApps({
+        username: process.env['SAPIM_USERNAME'],
+        password: process.env['SAPIM_PASSWORD'],
+        host: command.host
+    }, build().config).catch(handleError))
 
 program.parse(process.argv)
