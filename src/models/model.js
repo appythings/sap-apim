@@ -1,5 +1,11 @@
 const odata = require('odata-client')
+const NodeCache = require('node-cache');
 const request = require('request-promise')
+
+const samCache = new NodeCache({
+    stdTTL: 900,
+    checkperiod: 0,
+});
 
 module.exports = class Model {
     constructor(uri, loginUri, loginMethod, auth, resource) {
@@ -8,7 +14,6 @@ module.exports = class Model {
         this.loginMethod = loginMethod
         this.auth = auth
         this.resource = resource
-        this.cookie = undefined
     }
 
     async getHeaders(count = 0) {
@@ -20,13 +25,14 @@ module.exports = class Model {
             }
         }
         try {
+            const headers = samCache.get(this.loginUri);
             const optionHeaders = {
                 method: this.loginMethod,
                 uri: this.loginUri,
                 auth: this.auth,
                 headers: {
                     'X-CSRF-Token': 'Fetch',
-                    Cookie: this.cookie
+                    Cookie: headers ? headers.Cookie : undefined,
                 },
                 resolveWithFullResponse: true
             }
@@ -34,8 +40,11 @@ module.exports = class Model {
             const returnHeaders = {
                 Accept: 'application/json',
                 'x-csrf-token': response.headers['x-csrf-token'].toString(),
-                Cookie: response.headers['set-cookie'] ? response.headers['set-cookie'] : this.cookie,
+                Cookie: response.headers['set-cookie'] ? response.headers['set-cookie'] : headers.Cookie,
                 'Content-Type': 'application/json'
+            }
+            if (!headers) {
+                samCache.set(this.loginUri, returnHeaders);
             }
 
             return returnHeaders
