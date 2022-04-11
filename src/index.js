@@ -107,12 +107,20 @@ program.command('documentation <swagger> <apiProxyFolder>')
             }
             const sapimBuild = build()
             const name = await createDocumentation(sapimBuild.config, swagger, command.host)
+            console.log(name)
             const apiProxyModel = new apiProxy(sapimBuild.config)
+            console.log('1')
+
             await apiProxyModel.download(name, './downloaded')
+            console.log('1')
             await apiProxyModel.delete({name})
+            console.log('1')
             await fs.remove(apiProxyFolder + '/Documentation')
+            console.log('1')
             await fs.remove(apiProxyFolder + '/APIResource')
+            console.log('1')
             const json = await fs.readJson('./downloaded/APIProxy/Documentation/SWAGGER_JSON_en.html')
+            console.log('1')
             if (json.swagger === '2.0') {
                 json.basePath = json.basePath.replace('/' + name, '')
             } else {
