@@ -7,10 +7,19 @@ const FormData = require('form-data')
 const jwt = require('../lib/jwt')
 
 class Portal {
-    constructor(config) {
+    constructor(manifest, config) {
+        if (manifest) {
+            let yml = yaml.safeLoad(fs.readFileSync(manifest, 'utf8'))
+            const productConfig = yml.products
+            if (!productConfig || !productConfig.find(product => product.openapi)) {
+                throw new Error('no product found to upload')
+            }
+            this.swaggerFiles = productConfig.filter(product => product.openapi)
+        }
+
         this.config = config
         this.request = axios.create({
-            baseURL: `http://${this.config.hostname}`,
+            baseURL: this.config.hostname,
             timeout: 60000,
             headers: {
                 Accept: 'application/json',
@@ -20,6 +29,9 @@ class Portal {
     }
 
     async login() {
+        if (this.request.defaults.headers.common['Authorization']) {
+            return
+        }
         const data = {
             'client_id': this.config.clientId,
             'client_secret': this.config.clientSecret,
@@ -27,13 +39,12 @@ class Portal {
             'scope': this.config.scope
         }
         if (process.env.PRIVATE_KEY_BASE64 && process.env.PUBLIC_KEY_BASE64) {
-            const privateKey = Buffer.from(process.env.AAD_PRIVATE_KEY_BASE64, 'base64')
+            const privateKey = Buffer.from(process.env.PRIVATE_KEY_BASE64, 'base64')
                 .toString('utf8');
-            const publicKey = Buffer.from(process.env.AAD_PUBLIC_KEY_BASE64, 'base64')
+            const publicKey = Buffer.from(process.env.PUBLIC_KEY_BASE64, 'base64')
                 .toString('utf8');
-            const token = jwt.create(this.config.clientId, privateKey,
+            data.client_assertion = jwt.create(this.config.clientId, privateKey,
                 publicKey, this.config.aud);
-            data.client_assertion = token;
             data.client_assertion_type = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
         }
         const options = {
@@ -42,7 +53,7 @@ class Portal {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             data: qs.stringify(data),
-            url: `https://${this.config.tokenUrl}`
+            url: this.config.tokenUrl
         }
         const response = await axios(options)
         this.request.defaults.headers.common['Authorization'] = 'Bearer ' + response.data.access_token
@@ -60,14 +71,17 @@ class Portal {
         throw new Error('Openapi spec must be either yaml/yml or json')
     }
 
-    async pushSwagger(swagger) {
-        const parsedSwagger = await this.readSwaggerFile(swagger)
-        await SwaggerParser.validate(swagger);
-        await this.login()
-        return this.request.post(`api/environments/${this.config.environment}/apiproducts/${this.config.product}/specs${this.config.force ? '?force=true' : ""}`, {
-            "environmentId": this.config.environment,
-            'spec': parsedSwagger
-        })
+    async pushSwagger() {
+        return Promise.all(this.swaggerFiles.map(async product => {
+            console.log(`Uploading ${product.openapi} for product: ${product.name}`)
+            const parsedSwagger = await this.readSwaggerFile(product.openapi)
+            await SwaggerParser.validate(product.openapi);
+            await this.login()
+            return this.request.post(`api/environments/${this.config.environment}/apiproducts/${product.name}/specs${this.config.force ? '?force=true' : ""}`, {
+                "environmentId": this.config.environment,
+                'spec': parsedSwagger
+            })
+        }))
     }
 
     async pushMarkdown(zipFile) {
@@ -76,7 +90,7 @@ class Portal {
         form.append('zip', zipFile, {
             filename: 'markdown.zip'
         })
-        return axios.post(`http://${this.config.hostname}/markdown`,
+        return axios.post(`${this.config.hostname}/markdown`,
             form.getBuffer(),
             {
                 headers: {

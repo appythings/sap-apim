@@ -88,3 +88,9 @@ sap-apim kvms <manifest>
 sap-apim kvms manifest.yaml
 sap-apim kvms manifest.yaml --purgeDeleted // Deletes entries from the KVM that are not in the Manifest
 ```
+
+# Cloud Foundry
+[Set up Cloud Foundry login](https://help.sap.com/viewer/66d066d903c2473f81ec33acfe2ccdb4/Cloud/en-US/24a2c37abd754915a74ae0914bebaa5b.html)
+```
+sap-apim documentation --access_token $(sap-apim cf-login --tokenUrl <tokenUrl> --clientid <clientid> --secret <secret>)
+```

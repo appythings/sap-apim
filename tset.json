@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Usabilla",
+    "version": "1.0",
+    "description": ""
+  },
+  "servers": [
+    {
+      "url": "https://data.usabilla.com"
+    }
+  ],
+  "paths": {
+    "/live/websites/campaign/{id}/results": {
+      "get": {
+        "summary": "Get Campaign Results",
+        "description": "This request returns the responses of a campaign with a specific id.",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/getCampaignResultsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The campaign id. Use * (asterisk) to request feedback of all campaigns.",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/since"
+          }
+        ]
+      }
+    },
+    "/live/websites/campaign": {
+      "get": {
+        "summary": "Get Campaigns",
+        "description": "This request returns a list of your Usabilla for Websites Campaigns.",
+        "responses": {
+          "200": {
+            "description": "Success 200",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/getCampaignsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          },
+          {
+            "$ref": "#/components/parameters/since"
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "getCampaignResultsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "An array containing items of the requested resource type",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The number of items returned"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "A flag that indicates whether more items can be requested"
+          },
+          "lastTimestamp": {
+            "type": "integer",
+            "description": "The timestamp of the last item in the items array. Can be used to request more items when hasMore is true"
+          }
+        },
+        "required": [
+          "count",
+          "hasMore",
+          "items",
+          "lastTimestamp"
+        ],
+        "title": "getCampaignResultsResponse"
+      },
+      "Item": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for a campaign result."
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "Information about the browser user agent."
+          },
+          "location": {
+            "type": "string",
+            "description": "String containing geographical information about the location of the user based on the user's IP address."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The creation date of the campaign result item, in UTC. The format being used is %Y-%m-%dT%H:%M:%S.%fZ as defined in ISO 8601."
+          },
+          "campaignId": {
+            "type": "string",
+            "description": "Unique identifier for the campaign it belongs to."
+          },
+          "customData": {
+            "type": "object",
+            "description": "Custom variables that have been assigned to the campaign result.",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "data": {
+            "type": "object",
+            "description": "An array containing the values of the campaign form fields.",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Origin URL where the campaign result was registered."
+          },
+          "time": {
+            "type": "integer",
+            "description": "The amount of time the user has taken to complete the survey. Expressed in miliseconds."
+          }
+        },
+        "required": [
+          "campaignId",
+          "customData",
+          "data",
+          "date",
+          "id",
+          "location",
+          "time",
+          "url",
+          "userAgent"
+        ],
+        "title": "Item"
+      },
+      "getCampaignsResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "An array containing items of the requested resource type",
+            "items": {
+              "$ref": "#/components/schemas/Campaign"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "description": "The number of items returned"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "A flag that indicates whether more items can be requested"
+          },
+          "lastTimestamp": {
+            "type": "integer",
+            "description": "The timestamp of the last item in the items array. Can be used to request more items when hasMore is true"
+          }
+        },
+        "required": [
+          "count",
+          "hasMore",
+          "items",
+          "lastTimestamp"
+        ],
+        "title": "getCampaignResultsResponse"
+      },
+      "Campaign": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for a campaign."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The creation date of the campaign, in UTC. The format being used is %Y-%m-%dT%H:%M:%S.%fZ as defined in ISO 8601."
+          },
+          "buttonID": {
+            "type": "string",
+            "description": "The source button that triggers the campaign."
+          },
+          "analyticsId": {
+            "type": "string",
+            "description": "Analytics ID."
+          },
+          "status": {
+            "type": "string",
+            "description": "The status of the campaign. Possible values are created, active, paused and finished."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the campaign given when created. Can be updated in the campaign setup page."
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the campaign."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The url of the campaign when the campaign is of type Survey, empty otherwise."
+          }
+        },
+        "title": "Item"
+      },
+      "error": {
+        "type": "string"
+      }
+    },
+    "parameters": {
+      "limit": {
+        "name": "limit",
+        "example": "1",
+        "description": "Optional. URL query parameter that limits the number of retrieved results between 1 and 100. Defaults to 100 when omitted.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "since": {
+        "example": "1419340238645",
+        "name": "since",
+        "description": "Optional. UTC Timestamp (in milliseconds) URL query parameter used to retrieve items of which creation date is after the supplied value.\n",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        }
+      }
+    },
+    "securitySchemes": {}
+  },
+  "tags": [],
+  "security": []
+}

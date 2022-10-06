@@ -1,7 +1,7 @@
 {
   "name": "sap-apim",
   "bin": "src/index.js",
-  "version": "1.0.29",
+  "version": "1.0.42",
   "description": "Commandline tool to use the management APIs of SAP API Management",
   "main": "src/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "@apidevtools/swagger-parser": "^9.0.1",
     "api-spec-converter": "^2.12.0",
     "archiver": "^3.1.1",
-    "axios": "0.21.2",
+    "axios": "0.27.2",
     "chai": "^4.3.6",
     "commander": "^4.1.1",
     "dotenv": "^8.6.0",
