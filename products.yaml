@@ -1,5 +1,5 @@
 products:
-  - name: Example-product-silver2
+  - name: Example-product-silver
     title: Example product silver
     description: |
       Silver version of the example product
@@ -7,4 +7,14 @@ products:
     interval: 1
     timeunit: minute
     proxies:
-      - xmltojson
+      - echoheaders
+  - name: Example-product-gold
+    title: Example product gold
+    description: |
+      Gold version of the example product
+    quota: 3
+    interval: 1
+    timeunit: minute
+    proxies:
+      - echoheaders
+    openapi: swagger.json
