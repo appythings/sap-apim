@@ -11,5 +11,5 @@ provider:
   managedByProxy: true # default false
 kvms:
   test2:
-    key1: value1
+    key1: value3
     key3: value5

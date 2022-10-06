@@ -133,11 +133,12 @@ module.exports = class Model {
         q._batch.ops = q._batch.ops.map((op) => ({
             ...op, query: op.query.split('/Management.svc/').pop().replaceAll('%3D', '=').replaceAll('%2C', ',')
         }))
-        return this.processBatchResponse(await q.send().then(this.handleResponse))
+        return this.processBatchResponse(await q.send())
     }
 
     processBatchResponse(response) {
         const boundary = '--batch_'
+
         const responseLines = response.body.split(boundary)
         return responseLines.map(function (value) {
             const startJson = value.indexOf('{')

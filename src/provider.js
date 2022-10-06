@@ -48,9 +48,9 @@ module.exports = async (config, manifest) => {
     }
   }
   try {
-    const current = await provider.findById(providerConfig.name)
-    const currentProvider = JSON.parse(current.body)
-    if (isUpdated(currentProvider.d, newProvider, ['host', 'port', 'pathPrefix', 'useSSL', 'sslInfo.keyStore', 'sslInfo.keyAlias', 'sslInfo.trustStore'])) {
+    const currentProvider = await provider.findById(providerConfig.name)
+
+    if (isUpdated(currentProvider, newProvider, ['host', 'port', 'pathPrefix', 'useSSL', 'sslInfo.keyStore', 'sslInfo.keyAlias', 'sslInfo.trustStore'])) {
       if (providerConfig.managedByProxy === true) {
         const result = await provider.update(newProvider, providerConfig.name)
         console.log('Updated provider')

@@ -23,6 +23,7 @@ module.exports = class ApiProxy extends Model {
     const q = await this.getOdataQuery(undefined, this.transportUri)
     q.custom('name', name)
     const response = await q.get({encoding: null});
+
     const stream = MemoryStream.createReadStream(response.body);
     stream.pipe(unzip.Extract({path}))
     return streamToPromise(stream)

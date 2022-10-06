@@ -35,20 +35,13 @@ module.exports = async (config, manifest, purgeDeleted) => {
     }
 
     try {
-      const current = await kvmModel.findById(kvmName)
-      const currentkvm = JSON.parse(current.body)
-      await kvmModel.update(newkvm, currentkvm.d, purgeDeleted)
+      const currentkvm = await kvmModel.findById(kvmName)
+      await kvmModel.update(newkvm, currentkvm, purgeDeleted)
       console.log('Updated kvm: ' + newkvm.name)
     } catch (e) {
       if (e.message.includes('not be found')) {
         const response = await kvmModel.create(newkvm)
-        const body = JSON.parse(response.body)
-        if (body.error) {
-          console.error(body.error.message.value)
-          process.exitCode = 1
-        } else {
-          console.log('Created kvm: ' + newkvm.name)
-        }
+        console.log('Created kvm: ' + newkvm.name)
       } else {
         console.log(e.message)
         process.exitCode = 1

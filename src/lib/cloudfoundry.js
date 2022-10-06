@@ -14,6 +14,7 @@ module.exports = class CloudFoundry {
             resolveWithFullResponse: true,
         };
         const response = await request(optionHeaders);
+
         const body = JSON.parse(response.body);
         return body.access_token
     }

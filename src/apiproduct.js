@@ -38,17 +38,16 @@ module.exports = async (config, manifest) => {
     }
 
     try {
-      const current = await productModel.findById(product.name)
-      const currentProduct = JSON.parse(current.body)
-      const add = product.proxies.filter(proxy => !currentProduct.d.apiProxies.results.find(res => res.name === proxy))
+      const currentProduct = await productModel.findById(product.name)
+      const add = product.proxies.filter(proxy => !currentProduct.apiProxies.results.find(res => res.name === proxy))
       const actualAdd = []
       for(const index in add){
         await proxyModel.findById(add[index]).then(() => actualAdd.push(add[index])).catch(e => {
           console.log(`proxy ${add[index]} does not exist.`)
         })
       }
-      const remove = currentProduct.d.apiProxies.results.filter(res => !product.proxies.find(proxy => res.name === proxy)).map(res => res.name)
-      if (actualAdd.length > 0 || remove.length > 0 || isUpdated(currentProduct.d, newProduct, ['description', 'title', 'quotaCount', 'quotaInterval', 'quotaTimeUnit', 'scope'])) {
+      const remove = currentProduct.apiProxies.results.filter(res => !product.proxies.find(proxy => res.name === proxy)).map(res => res.name)
+      if (actualAdd.length > 0 || remove.length > 0 || isUpdated(currentProduct, newProduct, ['description', 'title', 'quotaCount', 'quotaInterval', 'quotaTimeUnit', 'scope'])) {
         const errors = await productModel.update(newProduct, product.name, actualAdd, remove)
         errors.forEach(response => {
           if (response.error) {
@@ -65,13 +64,7 @@ module.exports = async (config, manifest) => {
     } catch (e) {
       if (e.message.includes('not be found')) {
         const response = await productModel.create(newProduct)
-        const body = JSON.parse(response.body)
-        if (body.error) {
-          console.error(body.error.message.value)
-          process.exitCode = 1;
-        } else {
-          console.log('Created product: '+ newProduct.name)
-        }
+        console.log('Created product: '+ newProduct.name)
       } else {
         console.log(e.message)
         process.exitCode = 1
